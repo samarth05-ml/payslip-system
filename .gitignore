@@ -1,0 +1,13 @@
+# Virtual Environment
+venv/
+env/
+payslip_env/
+
+# Python cache
+__pycache__/
+
+# Database
+data/payslip.db
+
+# VS Code (optional)
+.vscode/
