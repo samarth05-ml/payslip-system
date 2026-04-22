@@ -8,6 +8,12 @@ employee_bp = Blueprint('employee', __name__)
 def add_employee():
     data = request.json
 
+    if not data.get('name') or not data.get('email'):
+        return jsonify({
+            "status": "error",
+            "message": "Missing required fields"
+        }), 400
+
     employee = Employee(
         name=data['name'],
         email=data['email'],

@@ -1,28 +1,55 @@
 from flask import Blueprint, request, jsonify
 from services.payslip_service import generate_payslip
+from services.pdf_service import generate_pdf
+from database.models import Payslip
 
 payslip_bp = Blueprint('payslip', __name__)
 
 @payslip_bp.route('/generate_payslip', methods=['POST'])
 def generate():
-    data = request.json
+    try:
+        data = request.json
 
-    payslip = generate_payslip(
-        data['employee_id'],
-        data['month']
-    )
+        # Basic validation
+        if not data.get('employee_id') or not data.get('month'):
+            return jsonify({
+                "status": "error",
+                "message": "Missing required fields"
+            }), 400
 
-    return jsonify({
-        "message": "Payslip generated",
-        "net_salary": payslip.net_salary
-    })
+        payslip = generate_payslip(
+            data['employee_id'],
+            data['month']
+        )
 
-from database.models import Payslip
+        return jsonify({
+            "status": "success",
+            "message": "Payslip generated",
+            "net_salary": payslip.net_salary
+        })
 
-# GET PAYSLIP BY EMPLOYEE ID
+    except ValueError as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 404
+
+    except Exception:
+        return jsonify({
+            "status": "error",
+            "message": "Something went wrong"
+        }), 500
+
+
 @payslip_bp.route('/get_payslip/<int:emp_id>', methods=['GET'])
 def get_payslip(emp_id):
     payslips = Payslip.query.filter_by(employee_id=emp_id).all()
+
+    if not payslips:
+        return jsonify({
+            "status": "error",
+            "message": "No payslips found"
+        }), 404
 
     result = []
 
@@ -37,16 +64,7 @@ def get_payslip(emp_id):
             "net_salary": p.net_salary
         })
 
-    return jsonify(result)
-'''testing 
-@payslip_bp.route('/test_payslip')
-def test_payslip():
-    from services.payslip_service import generate_payslip
-
-    payslip = generate_payslip(1, "April")
-
-    return {
-        "message": "Payslip generated",
-        "net_salary": payslip.net_salary
-    }'''
-from services.pdf_service import generate_pdf
+    return jsonify({
+        "status": "success",
+        "data": result
+    })

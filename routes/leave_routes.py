@@ -71,3 +71,23 @@ def approve_leave():
     return jsonify({
         "message": f"Leave {status.lower()} successfully"
     })
+
+# Get Leave Status
+
+@leave_bp.route('/leave_status/<int:employee_id>', methods=['GET'])
+def leave_status(employee_id):
+
+    #Get all leaves of employee
+    leaves = Leave.query.filter_by(employee_id=employee_id).all()
+
+    result = []
+
+    for leave in leaves:
+        result.append({
+            "leave_id": leave.id,
+            "days": leave.days,
+            "status": leave.status,
+            "approver_id": leave.approver_id
+        })
+
+    return jsonify(result)
