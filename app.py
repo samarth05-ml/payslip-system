@@ -4,6 +4,7 @@ from database.db import db
 from routes.employee_routes import employee_bp
 from routes.payslip_routes import payslip_bp
 from routes.leave_routes import leave_bp
+from routes.ml_routes import ml_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -13,7 +14,7 @@ db.init_app(app)
 app.register_blueprint(employee_bp)
 app.register_blueprint(payslip_bp)
 app.register_blueprint(leave_bp)
-
+app.register_blueprint(ml_bp)
 with app.app_context():
     db.create_all()
 

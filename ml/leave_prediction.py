@@ -5,6 +5,8 @@ from sklearn.metrics import accuracy_score
 
 from app import app
 from database.models import Employee, Leave, Payslip
+import joblib
+
 
 def create_dataset():
 
@@ -25,7 +27,6 @@ def create_dataset():
         if emp_payslips:
             avg_salary = sum([p.net_salary for p in emp_payslips]) / len(emp_payslips)
 
-        # Target variable
         will_take_leave = 1 if total_leaves > 2 else 0
 
         data.append({
@@ -35,28 +36,27 @@ def create_dataset():
             "target": will_take_leave
         })
 
-    df = pd.DataFrame(data)
-    return df
+    return pd.DataFrame(data)
 
 
 def train_model():
 
     df = create_dataset()
 
-    #  Features & Target
+    if df.empty:
+        print("No data available ❌")
+        return None
+
     X = df[["basic_salary", "approved_leaves", "avg_salary"]]
     y = df["target"]
 
-    # Split data
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
 
-    # Model
     model = RandomForestClassifier()
     model.fit(X_train, y_train)
 
-    # Accuracy
     predictions = model.predict(X_test)
     accuracy = accuracy_score(y_test, predictions)
 
@@ -69,8 +69,6 @@ if __name__ == "__main__":
     with app.app_context():
         model = train_model()
 
-        #Test prediction
-        sample = [[30000, 2, 28000]]  # basic_salary, approved_leaves, avg_salary
-        prediction = model.predict(sample)
-
-        print("Prediction (1=leave, 0=no leave):", prediction[0])
+        if model is not None:
+            joblib.dump(model, "ml/leave_model.pkl")
+            print("Model saved successfully ")
