@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payslip Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h2>MGM</h2>
+            <p>Evening College Udupi</p>
+        </div>
+
+        <ul>
+            <li class="active">Dashboard</li>
+            <li>Generate Payslip</li>
+            <li>Leave Prediction</li>
+            <li>Detect Anomaly</li>
+            <li>Employee Behavior</li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+
+        <!-- Top Bar -->
+        <div class="topbar">
+            <h3>Welcome, Admin</h3>
+        </div>
+
+        <!-- Heading -->
+        <div class="header">
+            <h1>Payslip Management System</h1>
+            <p>Manage employees, generate payslips and analyze data using ML</p>
+        </div>
+
+        <!-- Cards -->
+        <div class="cards">
+
+            <!-- Generate Payslip -->
+            <div class="card">
+                <h3>Generate Payslip</h3>
+                <input type="number" id="pay_emp_id" placeholder="Employee ID">
+                <input type="text" id="month" placeholder="Month">
+                <button onclick="generatePayslip()">Generate</button>
+                <p id="payslip_result"></p>
+            </div>
+
+            <!-- Predict Leave -->
+            <div class="card">
+                <h3>Predict Leave</h3>
+                <input type="number" id="empId" placeholder="Employee ID">
+                <button onclick="predictLeave()">Predict</button>
+                <p id="leave_result"></p>
+            </div>
+
+            <!-- Detect Anomaly -->
+            <div class="card">
+                <h3>Detect Anomaly</h3>
+                <button onclick="detectAnomaly()">Detect</button>
+                <pre id="anomaly_result"></pre>
+            </div>
+
+            <!-- Employee Behavior -->
+            <div class="card">
+                <h3>Employee Behavior</h3>
+                <button onclick="getBehavior()">Analyze</button>
+                <pre id="behavior_result"></pre>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- JavaScript -->
+<script>
+
+// Generate Payslip
+function generatePayslip() {
+    let empId = document.getElementById("pay_emp_id").value;
+    let month = document.getElementById("month").value;
+
+    fetch("http://127.0.0.1:5000/generate_payslip", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            employee_id: empId,
+            month: month
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("payslip_result").innerText =
+            "Net Salary: " + data.net_salary;
+    })
+    .catch(() => {
+        document.getElementById("payslip_result").innerText = "Error";
+    });
+}
+
+
+// Predict Leave
+function predictLeave() {
+    let id = document.getElementById("empId").value;
+
+    fetch(`http://127.0.0.1:5000/predict_leave/${id}`)
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("leave_result").innerText =
+            data.prediction === 1 ? "Will take leave" : "Will not take leave";
+    })
+    .catch(() => {
+        document.getElementById("leave_result").innerText = "Error";
+    });
+}
+
+
+// Detect Anomaly
+function detectAnomaly() {
+    fetch("http://127.0.0.1:5000/detect_anomaly")
+    .then(res => res.json())
+    .then(data => {
+        let result = "";
+
+        data.anomalies.forEach(a => {
+            result += `Emp ${a.employee_id} → Anomaly\n`;
+        });
+
+        document.getElementById("anomaly_result").innerText = result;
+    })
+    .catch(() => {
+        document.getElementById("anomaly_result").innerText = "Error";
+    });
+}
+
+
+// Employee Behavior
+function getBehavior() {
+    fetch("http://127.0.0.1:5000/employee_behavior")
+    .then(res => res.json())
+    .then(data => {
+        let result = "";
+
+        data.data.forEach(e => {
+            result += `Emp ${e.employee_id} → ${e.behavior}\n`;
+        });
+
+        document.getElementById("behavior_result").innerText = result;
+    })
+    .catch(() => {
+        document.getElementById("behavior_result").innerText = "Error";
+    });
+}
+
+</script>
+
+</body>
+</html>
