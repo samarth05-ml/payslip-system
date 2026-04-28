@@ -1,7 +1,7 @@
 import pandas as pd
 import joblib
 
-from database.models import Employee, Leave, Payslip
+from database.models import Employee, Leave, Payslip, Prediction
 
 
 def predict_leave(employee_id):
@@ -29,16 +29,26 @@ def predict_leave(employee_id):
         "avg_salary": avg_salary
     }])
 
-    prediction = model.predict(sample)
+    prediction = model.predict(sample)[0]
+    # SAVE TO DATABASE
+    new_prediction = Prediction(
+        employee_id=employee_id,
+        prediction=int(prediction)
+    )
 
-    return int(prediction[0])
+    from app import db
+    db.session.add(new_prediction)
+    db.session.commit()
+
+    return int(prediction)
+    
 
 # anamoly
 
 from sklearn.ensemble import IsolationForest
 import pandas as pd
-
-from database.models import Payslip
+from app import db
+from database.models import Payslip, Anomaly
 
 
 def detect_anomalies():
@@ -62,19 +72,31 @@ def detect_anomalies():
     if df.empty:
         raise ValueError("No payslip data available")
 
-    # Features only
+    # Features
     features = df[["basic_salary", "hra", "deductions", "net_salary"]]
 
     # Model
     model = IsolationForest(contamination=0.1, random_state=42)
     df["anomaly"] = model.fit_predict(features)
 
-    # Filter anomalies
     anomalies = df[df["anomaly"] == -1]
 
     result = []
 
+    # OPTIONAL: Clear old records (to avoid duplicates)
+    Anomaly.query.delete()
+
     for _, row in anomalies.iterrows():
+
+        # SAVE TO DB
+        anomaly = Anomaly(
+            employee_id=int(row["employee_id"]),
+            net_salary=float(row["net_salary"]),
+            status="Anomaly"
+        )
+
+        db.session.add(anomaly)
+
         result.append({
             "payslip_id": int(row["id"]),
             "employee_id": int(row["employee_id"]),
@@ -82,8 +104,9 @@ def detect_anomalies():
             "status": "Anomaly"
         })
 
-    return result
+    db.session.commit()
 
+    return result
 #behavior 
 
 from sklearn.cluster import KMeans
@@ -155,3 +178,70 @@ def get_employee_behavior():
         })
 
     return result
+
+def get_dashboard_summary():
+    from database.models import Employee, Payslip, Prediction, Anomaly
+
+    # Total employees
+    total_employees = Employee.query.count()
+
+    # Total payslips
+    total_payslips = Payslip.query.count()
+
+    # Use Prediction table
+    total_predictions = Prediction.query.count()
+
+    # Use Anomaly table
+    anomaly_count = Anomaly.query.filter_by(status="Anomaly").count()
+
+    return {
+        "total_employees": total_employees,
+        "payslips_generated": total_payslips,
+        "leave_predictions": total_predictions,
+        "anomalies": anomaly_count
+    }
+
+def get_analytics():
+    from database.models import Payslip, Leave
+    from collections import defaultdict
+
+    salary_data = defaultdict(float)
+    leave_data = defaultdict(int)
+
+    payslips = Payslip.query.all()
+    leaves = Leave.query.all()
+
+    # Salary trend (using month from Payslip)
+    for p in payslips:
+        month = p.month
+        salary_data[month] += p.net_salary
+
+    salary_trend = []
+    for month, total in salary_data.items():
+        salary_trend.append({
+            "month": month,
+            "total_salary": total
+        })
+
+    #Leave trend (FIXED bug here)
+    for l in leaves:
+        
+        if hasattr(l, "month"):
+            month = l.month
+        else:
+            # fallback if no month field
+            month = "Unknown"
+
+        leave_data[month] += l.days
+
+    leave_trend = []
+    for month, total in leave_data.items():
+        leave_trend.append({
+            "month": month,
+            "leaves": total
+        })
+
+    return {
+        "salary_trend": salary_trend,
+        "leave_trend": leave_trend
+    }

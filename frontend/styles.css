@@ -1,114 +1,167 @@
-* {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
+:root {
+  --sidebar-bg: #0d1b2a;
+  --card-bg: #fff;
+  --text-main: #1e2a37;
+  --green: #5ecc75;
+  --purple: #706cf8;
+  --orange: #ff9f43;
+  --blue: #4f9bff;
+  --gray-light: #f5f7fa;
+  --radius: 12px;
 }
 
 body {
-    background-color: #f5f6fa;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: var(--gray-light);
+  color: var(--text-main);
 }
 
-.container {
-    display: flex;
+.dashboard-container {
+  display: flex;
+  height: 100vh;
 }
 
 /* Sidebar */
 .sidebar {
-    width: 220px;
-    height: 100vh;
-    background-color: #0a1f44;
-    color: white;
-    padding: 20px;
+  width: 250px;
+  background: var(--sidebar-bg);
+  color: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.logo h2 {
-    margin-bottom: 5px;
+.brand {
+  text-align: center;
 }
 
-.logo p {
-    font-size: 12px;
-    color: #ccc;
+.logo {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
 }
 
-.sidebar ul {
-    list-style: none;
-    margin-top: 30px;
+.menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  margin: 4px 0;
+  border-radius: var(--radius);
+  color: #aebad6;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
-.sidebar ul li {
-    padding: 12px;
-    margin: 10px 0;
-    cursor: pointer;
-    border-radius: 5px;
+.menu a.active,
+.menu a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
-.sidebar ul li:hover,
-.sidebar ul .active {
-    background-color: #1e3a8a;
+.smart-insights {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: var(--radius);
+  text-align: center;
+  font-size: 14px;
 }
 
-/* Main */
-.main {
-    flex: 1;
-    padding: 20px;
+/* Main content */
+.content {
+  flex: 1;
+  padding: 20px 40px;
+  overflow-y: auto;
 }
 
-/* Topbar */
-.topbar {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Header */
-.header h1 {
-    margin-bottom: 10px;
+header input {
+  width: 300px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  border: 1px solid #ddd;
 }
 
-.header p {
-    color: gray;
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Cards */
-.cards {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-top: 30px;
+/* Stats cards */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 30px;
 }
 
 .card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
-.card h3 {
-    margin-bottom: 10px;
+.card .value {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 10px 0;
 }
 
-.card input {
-    width: 100%;
-    padding: 8px;
-    margin: 8px 0;
+.trend.up {
+  color: var(--green);
 }
 
-.card p, .card pre {
-    margin-top: 10px;
-    color: gray;
-    white-space: pre-wrap;
+.trend.down {
+  color: var(--orange);
 }
 
-.card button {
-    padding: 10px 15px;
-    border: none;
-    background-color: #2563eb;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
+/* Action sections */
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 30px;
 }
 
-.card button:hover {
-    background-color: #1e40af;
+.action {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.action h3 {
+  margin-top: 0;
+}
+
+.action input,
+.action select {
+  display: block;
+  margin-top: 10px;
+  padding: 10px;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid #ddd;
+}
+
+button {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  background: var(--purple);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
 }

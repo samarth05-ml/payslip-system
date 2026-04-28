@@ -80,3 +80,21 @@ def behavior():
             "status": "error",
             "message": "Something went wrong"
         }), 500
+    
+from services.ml_service import get_dashboard_summary
+@ml_bp.route('/dashboard_summary', methods=['GET'])
+def dashboard_summary():
+    try:
+        data = get_dashboard_summary()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+from services.ml_service import get_analytics
+@ml_bp.route('/analytics', methods=['GET'])
+def analytics():
+    try:
+        data = get_analytics()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

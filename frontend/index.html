@@ -1,167 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Payslip Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payslip Pro Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<div class="container">
-
+  <div class="dashboard-container">
     <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo">
-            <h2>MGM</h2>
-            <p>Evening College Udupi</p>
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/logo.svg" alt="Payslip Pro" class="logo" />
+        <h2>Payslip Pro</h2>
+        <p>Smart Payroll Solutions</p>
+      </div>
+      <nav class="menu">
+        <a class="active"><img src="assets/icons/dashboard.svg" /> Dashboard</a>
+        <a><img src="assets/icons/payslip.svg" /> Generate Payslip</a>
+        <a><img src="assets/icons/leave.svg" /> Leave Prediction</a>
+        <a><img src="assets/icons/anomaly.svg" /> Detect Anomaly</a>
+        <a><img src="assets/icons/behavior.svg" /> Employee Behavior</a>
+        <a><img src="assets/icons/reports.svg" /> Reports</a>
+        <a><img src="assets/icons/settings.svg" /> Settings</a>
+      </nav>
+
+      <div class="smart-insights">
+        <img src="assets/icons/reports.svg" alt="" />
+        <h4>Smart Insights</h4>
+        <p>AI-powered insights to make better decisions.</p>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="content">
+      <header>
+        <h1>Welcome back, Admin! 👋</h1>
+        <input type="text" placeholder="Search anything..." />
+        <div class="profile">
+          <img src="[via.placeholder.com](https://via.placeholder.com/40)" alt="Admin" />
+          <div>
+            <p><strong>Admin</strong></p>
+            <small>Administrator</small>
+          </div>
+        </div>
+      </header>
+
+      <section class="stats">
+        <div class="card purple">
+          <h3>Total Employees</h3>
+          <p class="value">245</p>
+          <span class="trend up">↑ 12 this month</span>
+        </div>
+        <div class="card green">
+          <h3>Payslips Generated</h3>
+          <p class="value">128</p>
+          <span class="trend up">↑ 8 this month</span>
+        </div>
+        <div class="card orange">
+          <h3>Leave Predictions</h3>
+          <p class="value">34</p>
+          <span class="trend down">↓ 5 this month</span>
+        </div>
+        <div class="card blue">
+          <h3>Anomalies Detected</h3>
+          <p class="value">7</p>
+          <span class="trend down">↓ 2 this month</span>
+        </div>
+      </section>
+
+      <section class="actions">
+        <div class="action green">
+          <h3>Generate Payslip</h3>
+          <input type="text" placeholder="Employee ID" />
+          <select>
+            <option>Select Month</option>
+            <option>April</option>
+            <option>March</option>
+          </select>
+          <button>Generate Payslip</button>
         </div>
 
-        <ul>
-            <li class="active">Dashboard</li>
-            <li>Generate Payslip</li>
-            <li>Leave Prediction</li>
-            <li>Detect Anomaly</li>
-            <li>Employee Behavior</li>
-        </ul>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main">
-
-        <!-- Top Bar -->
-        <div class="topbar">
-            <h3>Welcome, Admin</h3>
+        <div class="action purple">
+          <h3>Predict Leave</h3>
+          <input type="text" placeholder="Enter Employee ID" />
+          <button>Predict Leave</button>
         </div>
 
-        <!-- Heading -->
-        <div class="header">
-            <h1>Payslip Management System</h1>
-            <p>Manage employees, generate payslips and analyze data using ML</p>
+        <div class="action orange">
+          <h3>Detect Anomaly</h3>
+          <p>Detect unusual patterns or anomalies in employee data.</p>
+          <button>Detect Anomaly</button>
         </div>
 
-        <!-- Cards -->
-        <div class="cards">
-
-            <!-- Generate Payslip -->
-            <div class="card">
-                <h3>Generate Payslip</h3>
-                <input type="number" id="pay_emp_id" placeholder="Employee ID">
-                <input type="text" id="month" placeholder="Month">
-                <button onclick="generatePayslip()">Generate</button>
-                <p id="payslip_result"></p>
-            </div>
-
-            <!-- Predict Leave -->
-            <div class="card">
-                <h3>Predict Leave</h3>
-                <input type="number" id="empId" placeholder="Employee ID">
-                <button onclick="predictLeave()">Predict</button>
-                <p id="leave_result"></p>
-            </div>
-
-            <!-- Detect Anomaly -->
-            <div class="card">
-                <h3>Detect Anomaly</h3>
-                <button onclick="detectAnomaly()">Detect</button>
-                <pre id="anomaly_result"></pre>
-            </div>
-
-            <!-- Employee Behavior -->
-            <div class="card">
-                <h3>Employee Behavior</h3>
-                <button onclick="getBehavior()">Analyze</button>
-                <pre id="behavior_result"></pre>
-            </div>
-
+        <div class="action blue">
+          <h3>Employee Behavior</h3>
+          <p>Analyze employee behavior and performance trends.</p>
+          <button>Analyze Behavior</button>
         </div>
-
-    </div>
-
-</div>
-
-<!-- JavaScript -->
-<script>
-
-// Generate Payslip
-function generatePayslip() {
-    let empId = document.getElementById("pay_emp_id").value;
-    let month = document.getElementById("month").value;
-
-    fetch("http://127.0.0.1:5000/generate_payslip", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            employee_id: empId,
-            month: month
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("payslip_result").innerText =
-            "Net Salary: " + data.net_salary;
-    })
-    .catch(() => {
-        document.getElementById("payslip_result").innerText = "Error";
-    });
-}
-
-
-// Predict Leave
-function predictLeave() {
-    let id = document.getElementById("empId").value;
-
-    fetch(`http://127.0.0.1:5000/predict_leave/${id}`)
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("leave_result").innerText =
-            data.prediction === 1 ? "Will take leave" : "Will not take leave";
-    })
-    .catch(() => {
-        document.getElementById("leave_result").innerText = "Error";
-    });
-}
-
-
-// Detect Anomaly
-function detectAnomaly() {
-    fetch("http://127.0.0.1:5000/detect_anomaly")
-    .then(res => res.json())
-    .then(data => {
-        let result = "";
-
-        data.anomalies.forEach(a => {
-            result += `Emp ${a.employee_id} → Anomaly\n`;
-        });
-
-        document.getElementById("anomaly_result").innerText = result;
-    })
-    .catch(() => {
-        document.getElementById("anomaly_result").innerText = "Error";
-    });
-}
-
-
-// Employee Behavior
-function getBehavior() {
-    fetch("http://127.0.0.1:5000/employee_behavior")
-    .then(res => res.json())
-    .then(data => {
-        let result = "";
-
-        data.data.forEach(e => {
-            result += `Emp ${e.employee_id} → ${e.behavior}\n`;
-        });
-
-        document.getElementById("behavior_result").innerText = result;
-    })
-    .catch(() => {
-        document.getElementById("behavior_result").innerText = "Error";
-    });
-}
-
-</script>
-
+      </section>
+    </main>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>

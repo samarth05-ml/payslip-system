@@ -31,3 +31,16 @@ class Leave(db.Model):
 
     approver_id = db.Column(db.Integer)  
     # who will approve (HR or MD)
+
+class Prediction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    employee_id = db.Column(db.Integer)
+    prediction = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+class Anomaly(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    employee_id = db.Column(db.Integer)
+    net_salary = db.Column(db.Float)
+    status = db.Column(db.String(20))  # "Anomaly" or "Normal"
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
