@@ -1,106 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Payslip Pro Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <title>Payslip Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="dashboard-container">
+
+<div class="container">
+
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="brand">
-        <img src="assets/logo.svg" alt="Payslip Pro" class="logo" />
-        <h2>Payslip Pro</h2>
-        <p>Smart Payroll Solutions</p>
-      </div>
-      <nav class="menu">
-        <a class="active"><img src="assets/icons/dashboard.svg" /> Dashboard</a>
-        <a><img src="assets/icons/payslip.svg" /> Generate Payslip</a>
-        <a><img src="assets/icons/leave.svg" /> Leave Prediction</a>
-        <a><img src="assets/icons/anomaly.svg" /> Detect Anomaly</a>
-        <a><img src="assets/icons/behavior.svg" /> Employee Behavior</a>
-        <a><img src="assets/icons/reports.svg" /> Reports</a>
-        <a><img src="assets/icons/settings.svg" /> Settings</a>
-      </nav>
-
-      <div class="smart-insights">
-        <img src="assets/icons/reports.svg" alt="" />
-        <h4>Smart Insights</h4>
-        <p>AI-powered insights to make better decisions.</p>
-      </div>
-    </aside>
-
-    <!-- Main content -->
-    <main class="content">
-      <header>
-        <h1>Welcome back, Admin! 👋</h1>
-        <input type="text" placeholder="Search anything..." />
-        <div class="profile">
-          <img src="[via.placeholder.com](https://via.placeholder.com/40)" alt="Admin" />
-          <div>
-            <p><strong>Admin</strong></p>
-            <small>Administrator</small>
-          </div>
-        </div>
-      </header>
-
-      <section class="stats">
-        <div class="card purple">
-          <h3>Total Employees</h3>
-          <p class="value">245</p>
-          <span class="trend up">↑ 12 this month</span>
-        </div>
-        <div class="card green">
-          <h3>Payslips Generated</h3>
-          <p class="value">128</p>
-          <span class="trend up">↑ 8 this month</span>
-        </div>
-        <div class="card orange">
-          <h3>Leave Predictions</h3>
-          <p class="value">34</p>
-          <span class="trend down">↓ 5 this month</span>
-        </div>
-        <div class="card blue">
-          <h3>Anomalies Detected</h3>
-          <p class="value">7</p>
-          <span class="trend down">↓ 2 this month</span>
-        </div>
-      </section>
-
-      <section class="actions">
-        <div class="action green">
-          <h3>Generate Payslip</h3>
-          <input type="text" placeholder="Employee ID" />
-          <select>
-            <option>Select Month</option>
-            <option>April</option>
-            <option>March</option>
-          </select>
-          <button>Generate Payslip</button>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="assets/ymgm-logo.jpg" alt="logo">
+            <h2>MGM</h2>
+            <h5>Evening College</h5>
         </div>
 
-        <div class="action purple">
-          <h3>Predict Leave</h3>
-          <input type="text" placeholder="Enter Employee ID" />
-          <button>Predict Leave</button>
+        <ul>
+    <li class="active">
+        <img src="./assets/dashboard.svg" class="icon"> Dashboard
+    </li>
+
+    <li>
+        <img src="./assets/payslip.svg" class="icon"> Generate Payslip
+    </li>
+
+    <li>
+        <img src="./assets/leave.svg" class="icon"> Leave Prediction
+    </li>
+
+    <li>
+        <img src="./assets/anomaly.svg" class="icon"> Detect Anomaly
+    </li>
+
+    <li>
+        <img src="./assets/behavior.svg" class="icon"> Employee Behavior
+    </li>
+</ul>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <h3>Welcome, Admin</h3>
+            <div class="profile">
+                <img src="assets/profile.svg" alt="profile">
+            </div>
         </div>
 
-        <div class="action orange">
-          <h3>Detect Anomaly</h3>
-          <p>Detect unusual patterns or anomalies in employee data.</p>
-          <button>Detect Anomaly</button>
+        <!-- Header -->
+        <div class="header">
+            <h1>Payslip Management System</h1>
+            <p>Manage employees and analyze using ML</p>
         </div>
 
-        <div class="action blue">
-          <h3>Employee Behavior</h3>
-          <p>Analyze employee behavior and performance trends.</p>
-          <button>Analyze Behavior</button>
+        <!-- Stats -->
+        <div class="cards">
+
+            <div class="card">
+                <h3>Total Employees</h3>
+                <p id="total_employees">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Payslips</h3>
+                <p id="total_payslips">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Predictions</h3>
+                <p id="total_predictions">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Anomalies</h3>
+                <p id="total_anomalies">0</p>
+            </div>
+
         </div>
-      </section>
-    </main>
-  </div>
-  <script src="script.js"></script>
+
+        <!-- Chart -->
+        <div class="chart-card">
+            <h3>Salary Trend</h3>
+            <canvas id="salaryChart" height="100"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="./script.js"></script>
+
 </body>
 </html>

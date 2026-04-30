@@ -5,9 +5,12 @@ from routes.employee_routes import employee_bp
 from routes.payslip_routes import payslip_bp
 from routes.leave_routes import leave_bp
 from routes.ml_routes import ml_bp
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+CORS(app)   # 🔥 THIS LINE WAS MISSING
 
 db.init_app(app)
 
@@ -15,6 +18,7 @@ app.register_blueprint(employee_bp)
 app.register_blueprint(payslip_bp)
 app.register_blueprint(leave_bp)
 app.register_blueprint(ml_bp)
+
 with app.app_context():
     db.create_all()
 
