@@ -2,96 +2,573 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Payslip Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MGM Payslip Analytics & Management Console</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <div class="container">
 
-    <!-- Sidebar -->
+    <!-- Sidebar Navigation -->
     <div class="sidebar">
         <div class="logo">
-            <img src="assets/ymgm-logo.jpg" alt="logo">
+            <img src="./assets/logo.svg" alt="MGM Logo">
             <h2>MGM</h2>
             <h5>Evening College</h5>
         </div>
 
         <ul>
-    <li class="active">
-        <img src="./assets/dashboard.svg" class="icon"> Dashboard
-    </li>
-
-    <li>
-        <img src="./assets/payslip.svg" class="icon"> Generate Payslip
-    </li>
-
-    <li>
-        <img src="./assets/leave.svg" class="icon"> Leave Prediction
-    </li>
-
-    <li>
-        <img src="./assets/anomaly.svg" class="icon"> Detect Anomaly
-    </li>
-
-    <li>
-        <img src="./assets/behavior.svg" class="icon"> Employee Behavior
-    </li>
-</ul>
+            <li class="nav-item active" data-tab="dashboard">
+                <img src="./assets/dashboard.svg" class="icon" alt="Dashboard"> <span>Dashboard</span>
+            </li>
+            <li class="nav-item" data-tab="employees">
+                <img src="./assets/settings.svg" class="icon" alt="Employees"> <span>Employees</span>
+            </li>
+            <li class="nav-item" data-tab="payslips">
+                <img src="./assets/payslip.svg" class="icon" alt="Payslip"> <span>Generate Payslip</span>
+            </li>
+            <li class="nav-item" data-tab="leaves">
+                <img src="./assets/leave.svg" class="icon" alt="Leaves"> <span>Leaves & AI</span>
+            </li>
+            <li class="nav-item" data-tab="anomalies">
+                <img src="./assets/anomaly.svg" class="icon" alt="Anomalies"> <span>AI Salary Audit</span>
+            </li>
+            <li class="nav-item" data-tab="behavior">
+                <img src="./assets/behavior.svg" class="icon" alt="Behavior"> <span>Behavior Clusters</span>
+            </li>
+        </ul>
     </div>
 
-    <!-- Main -->
+    <!-- Main Content Container -->
     <div class="main">
 
-        <!-- Topbar -->
+        <!-- Topbar: Global Utility Panel -->
         <div class="topbar">
-            <h3>Welcome, Admin</h3>
-            <div class="profile">
-                <img src="assets/profile.svg" alt="profile">
+            <!-- Active View Title -->
+            <h3 id="current_panel_title">Dashboard Analytics</h3>
+            
+            <div class="topbar-right">
+                <!-- Smart API Server Connection Status Badge -->
+                <div id="connection_badge" class="status-pill offline">
+                    <span class="status-indicator"></span>
+                    <span id="connection_text">Offline Demo Mode</span>
+                </div>
+                
+                <!-- Role-Switching Demonstration dropdown -->
+                <div class="role-container">
+                    <span>Active Session:</span>
+                    <select id="session_role" class="role-select">
+                        <option value="Admin">Administrator</option>
+                        <option value="HR">HR Officer</option>
+                        <option value="MD">Managing Director</option>
+                        <option value="Employee">Standard Employee</option>
+                    </select>
+                </div>
+                
+                <!-- Profile Indicator -->
+                <div class="profile">
+                    <div class="profile-info">
+                        <h4 id="user_profile_name">MGM Admin</h4>
+                        <p id="user_profile_role">Global Payroll</p>
+                    </div>
+                    <img src="./assets/logo.svg" alt="Profile" style="border: 1px solid var(--border-color)">
+                </div>
             </div>
         </div>
 
-        <!-- Header -->
-        <div class="header">
-            <h1>Payslip Management System</h1>
-            <p>Manage employees and analyze using ML</p>
+        <!-- Section 1: Dashboard View -->
+        <div id="dashboard" class="tab-content active">
+            <div class="header">
+                <h1>Executive Summary</h1>
+                <p>Monitor metrics, analyze payroll distributions, and audit anomalies in real-time.</p>
+            </div>
+            
+            <!-- Dashboard Stats Grid -->
+            <div class="cards">
+                <div class="card card-employees">
+                    <div class="card-info">
+                        <h3>Total Employees</h3>
+                        <p id="total_employees">0</p>
+                    </div>
+                    <div class="card-icon">
+                        <img src="./assets/settings.svg" alt="Employees">
+                    </div>
+                </div>
+                <div class="card card-payslips">
+                    <div class="card-info">
+                        <h3>Payslips Issued</h3>
+                        <p id="total_payslips">0</p>
+                    </div>
+                    <div class="card-icon">
+                        <img src="./assets/payslip.svg" alt="Payslips">
+                    </div>
+                </div>
+                <div class="card card-predictions">
+                    <div class="card-info">
+                        <h3>Leave Forecasts</h3>
+                        <p id="total_predictions">0</p>
+                    </div>
+                    <div class="card-icon">
+                        <img src="./assets/leave.svg" alt="Predictions">
+                    </div>
+                </div>
+                <div class="card card-anomalies">
+                    <div class="card-info">
+                        <h3>Audited Anomalies</h3>
+                        <p id="total_anomalies" style="color: var(--accent-red)">0</p>
+                    </div>
+                    <div class="card-icon">
+                        <img src="./assets/anomaly.svg" alt="Anomalies">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Analytics Layout -->
+            <div class="dashboard-grid">
+                <!-- Salary Distribution Bar Chart -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>📊 Payroll Monthly Distributions</h3>
+                    </div>
+                    <canvas id="salaryChart" style="max-height: 330px;"></canvas>
+                </div>
+                
+                <!-- Dynamic Log of Events -->
+                <div class="recent-activity-panel">
+                    <div class="panel-header">
+                        <h3>🔔 Activity Log</h3>
+                    </div>
+                    <div id="activity_log" class="activity-list">
+                        <!-- Filled Dynamically -->
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Stats -->
-        <div class="cards">
-
-            <div class="card">
-                <h3>Total Employees</h3>
-                <p id="total_employees">0</p>
+        <!-- Section 2: Manage Employees View -->
+        <div id="employees" class="tab-content">
+            <div class="header">
+                <h1>Employee Directory</h1>
+                <p>Add and configure company personnel, base salaries, and designated operational access levels.</p>
             </div>
-
-            <div class="card">
-                <h3>Payslips</h3>
-                <p id="total_payslips">0</p>
+            
+            <div class="grid-form-split">
+                <!-- Form to Register New Employee -->
+                <div class="form-card">
+                    <h3>➕ Register Employee</h3>
+                    <form id="add_employee_form">
+                        <div class="form-group">
+                            <label for="emp_name">Full Name</label>
+                            <input type="text" id="emp_name" class="form-control" placeholder="e.g. Samarth Sharma" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="emp_email">Email Address</label>
+                            <input type="email" id="emp_email" class="form-control" placeholder="e.g. samarth@mgm.edu" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="emp_designation">Designation</label>
+                            <input type="text" id="emp_designation" class="form-control" placeholder="e.g. Senior Lecturer" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="emp_salary">Basic Salary (Monthly, $)</label>
+                            <input type="number" id="emp_salary" class="form-control" placeholder="e.g. 45000" min="1000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="emp_role">System Role</label>
+                            <select id="emp_role" class="form-control" required style="background-color: var(--bg-primary);">
+                                <option value="Employee">Standard Employee</option>
+                                <option value="HR">HR Officer</option>
+                                <option value="MD">Managing Director</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 25px;">
+                            Save Employee
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Table listing current employees -->
+                <div class="table-card" style="margin-bottom: 0;">
+                    <div class="table-header-actions">
+                        <h3>👥 Corporate Roster</h3>
+                        <div class="search-input-wrapper">
+                            <input type="text" id="employee_search" class="search-input" placeholder="Search by name, email, role...">
+                        </div>
+                    </div>
+                    <div class="table-wrapper" style="max-height: 480px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Designation</th>
+                                    <th>Base Salary</th>
+                                    <th>System Role</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employee_table_body">
+                                <!-- Filled Dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-
-            <div class="card">
-                <h3>Predictions</h3>
-                <p id="total_predictions">0</p>
-            </div>
-
-            <div class="card">
-                <h3>Anomalies</h3>
-                <p id="total_anomalies">0</p>
-            </div>
-
         </div>
 
-        <!-- Chart -->
-        <div class="chart-card">
-            <h3>Salary Trend</h3>
-            <canvas id="salaryChart" height="100"></canvas>
+        <!-- Section 3: Generate Payslip View -->
+        <div id="payslips" class="tab-content">
+            <div class="header">
+                <h1>Compensation Paycheck Generator</h1>
+                <p>Run payroll processing for individual employees and review professional corporate pay checks.</p>
+            </div>
+            
+            <div class="payslip-generator-layout">
+                <!-- Selection Panel -->
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="form-card">
+                        <h3>⚙️ Payroll Parameters</h3>
+                        <form id="generate_payslip_form">
+                            <div class="form-group">
+                                <label for="payslip_emp_id">Select Employee</label>
+                                <select id="payslip_emp_id" class="form-control" required style="background-color: var(--bg-primary);">
+                                    <option value="" disabled selected>Select employee...</option>
+                                    <!-- Filled Dynamically -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="payslip_month">Processing Month</label>
+                                <select id="payslip_month" class="form-control" required style="background-color: var(--bg-primary);">
+                                    <option value="January">January</option>
+                                    <option value="February">February</option>
+                                    <option value="March">March</option>
+                                    <option value="April">April</option>
+                                    <option value="May">May</option>
+                                    <option value="June">June</option>
+                                    <option value="July">July</option>
+                                    <option value="August">August</option>
+                                    <option value="September">September</option>
+                                    <option value="October">October</option>
+                                    <option value="November">November</option>
+                                    <option value="December">December</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 20px;">
+                                Process Payroll & Generate
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Past Generated Payslips history card -->
+                    <div class="table-card">
+                        <h3 style="font-size: 14px; margin-bottom: 15px;">📜 Processed History</h3>
+                        <div class="table-wrapper" style="max-height: 200px; overflow-y: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Net Paid</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="past_payslips_body">
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; color: var(--text-muted);">Select an employee to load history</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Interactive High-Fidelity Paycheck Printout Panel -->
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="table-card" style="margin-bottom: 0; padding: 25px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 0;">💵 Live Paycheck Invoice</h3>
+                            <button id="print_payslip_btn" class="btn-primary" style="padding: 8px 16px; font-size: 12.5px; opacity: 0.6;" disabled>
+                                🖨️ Print Invoice
+                            </button>
+                        </div>
+                        
+                        <!-- Paycheck Structure -->
+                        <div id="paycheck_target" class="paycheck-container">
+                            <div class="paycheck-watermark">MGM Evening</div>
+                            
+                            <!-- Header Info -->
+                            <div class="paycheck-header">
+                                <div class="paycheck-org">
+                                    <h2>MGM EVENING COLLEGE</h2>
+                                    <p>Corporate Payroll Processing Centre</p>
+                                    <p>Registered MGM Campus Office, Udupi</p>
+                                </div>
+                                <div class="paycheck-title-block">
+                                    <h3>INVOICE STATEMENT</h3>
+                                    <p id="invoice_serial">REF-MS-00000</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Employee metadata fields -->
+                            <div class="paycheck-meta">
+                                <div class="meta-field">
+                                    <span>Employee Name</span>
+                                    <strong id="invoice_emp_name">-</strong>
+                                </div>
+                                <div class="meta-field">
+                                    <span>Designation / Role</span>
+                                    <strong id="invoice_emp_designation">-</strong>
+                                </div>
+                                <div class="meta-field">
+                                    <span>Payment Month</span>
+                                    <strong id="invoice_month">-</strong>
+                                </div>
+                                <div class="meta-field">
+                                    <span>Email Address</span>
+                                    <strong id="invoice_emp_email">-</strong>
+                                </div>
+                            </div>
+                            
+                            <!-- Earnings vs Deductions Breakdown -->
+                            <div class="paycheck-breakdown">
+                                <div class="breakdown-col">
+                                    <div class="breakdown-title">Earnings Description</div>
+                                    <div class="breakdown-row">
+                                        <span>Basic Base Salary</span>
+                                        <strong id="invoice_basic_salary">$0.00</strong>
+                                    </div>
+                                    <div class="breakdown-row">
+                                        <span>HRA (House Rent Allowance)</span>
+                                        <strong id="invoice_hra">$0.00</strong>
+                                    </div>
+                                    <div class="breakdown-row" style="border-bottom: none;">
+                                        <span>Special Benefits</span>
+                                        <strong>$0.00</strong>
+                                    </div>
+                                </div>
+                                
+                                <div class="breakdown-col">
+                                    <div class="breakdown-title">Deductions Description</div>
+                                    <div class="breakdown-row">
+                                        <span>Salary Deductions</span>
+                                        <strong id="invoice_deductions" style="color: #ef4444;">$0.00</strong>
+                                    </div>
+                                    <div class="breakdown-row">
+                                        <span>Professional Taxes</span>
+                                        <strong style="color: #ef4444;">$0.00</strong>
+                                    </div>
+                                    <div class="breakdown-row" style="border-bottom: none;">
+                                        <span>Provident Fund</span>
+                                        <strong style="color: #ef4444;">$0.00</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Final Net salary block -->
+                            <div class="paycheck-total">
+                                <h4>Total Corporate Net Salary Disbursed</h4>
+                                <p id="invoice_net_salary">$0.00</p>
+                            </div>
+                            
+                            <!-- Signatures block -->
+                            <div class="paycheck-footer">
+                                <div>This is a computer generated payroll invoice statement, signatures verified.</div>
+                                <div class="paycheck-signature">
+                                    <span>Finance Registrar</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Leave Management & ML Prediction View -->
+        <div id="leaves" class="tab-content">
+            <div class="header">
+                <h1>Leaves & Predictive AI Console</h1>
+                <p>Apply for leaves, process administrative approvals, and leverage ML models to forecast leave probabilities.</p>
+            </div>
+            
+            <div class="ml-panel-grid">
+                <!-- Apply Leave and AI predictor panel -->
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <!-- Leave Application Card -->
+                    <div class="form-card">
+                        <h3>📅 Apply for Leave</h3>
+                        <form id="apply_leave_form">
+                            <div class="form-group">
+                                <label for="leave_emp_id">Employee Name</label>
+                                <select id="leave_emp_id" class="form-control" required style="background-color: var(--bg-primary);">
+                                    <option value="" disabled selected>Select employee...</option>
+                                    <!-- Filled Dynamically -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="leave_days">Number of Days Requested</label>
+                                <input type="number" id="leave_days" class="form-control" min="1" max="30" placeholder="e.g. 5" required>
+                            </div>
+                            <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 15px;">
+                                Submit Application
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- AI Prediction Card -->
+                    <div class="form-card" style="border-color: rgba(139, 92, 246, 0.25);">
+                        <h3 style="color: var(--accent-purple);">🔮 AI Leave Forecast Engine</h3>
+                        <div class="form-group">
+                            <label for="predict_emp_id">Evaluate Target Employee</label>
+                            <select id="predict_emp_id" class="form-control" style="background-color: var(--bg-primary);">
+                                <option value="" disabled selected>Select employee...</option>
+                                <!-- Filled Dynamically -->
+                            </select>
+                        </div>
+                        <button id="run_prediction_btn" class="btn-primary" style="width: 100%; justify-content: center; background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%);">
+                            Run AI Leave Forecast
+                        </button>
+                        
+                        <!-- Prediction scoring outputs -->
+                        <div id="prediction_score_card" class="risk-meter-container" style="display: none;">
+                            <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
+                                Machine Learning Assessment
+                            </span>
+                            <div id="risk_meter" class="risk-score-display low">
+                                <h2 id="risk_verdict">NORMAL</h2>
+                                <span id="risk_subtext">Will not take leave</span>
+                            </div>
+                            <p id="risk_details" style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">
+                                Base Salary vs Average Salary index suggests stable scheduling patterns.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Table listing current leaves/approvals queue -->
+                <div class="table-card" style="margin-bottom: 0;">
+                    <div class="table-header-actions">
+                        <h3>⏳ Leaves & Approvals Stream</h3>
+                    </div>
+                    <div class="table-wrapper" style="max-height: 480px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Applicant Name</th>
+                                    <th>Days</th>
+                                    <th>Assigned Approver ID</th>
+                                    <th>Status Badge</th>
+                                    <th>Action Queue</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaves_table_body">
+                                <!-- Filled Dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: AI Anomaly Detector View -->
+        <div id="anomalies" class="tab-content">
+            <div class="header">
+                <h1>Salary Anomaly Audit Centre</h1>
+                <p>Trigger Isolation Forest anomaly detection algorithms to verify integrity across all generated payslips.</p>
+            </div>
+            
+            <!-- Audit control header -->
+            <div class="ai-audit-header-card">
+                <span class="pulse-circle"></span>
+                <h2>Unsupervised Isolation Forest Integrity Scan</h2>
+                <p>Audits basic salary, HRA, deductions, and final net salaries to pinpoint data manipulation or entry errors.</p>
+                <button id="trigger_audit_btn" class="btn-audit">
+                    Initiate Security Integrity Audit
+                </button>
+            </div>
+            
+            <!-- Table displaying audited anomalies -->
+            <div class="table-card">
+                <h3 style="margin-bottom: 20px;">🛡️ Flags & Anomaly Detections Log</h3>
+                <div class="table-wrapper" style="max-height: 400px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Payslip ID</th>
+                                <th>Employee ID</th>
+                                <th>Disbursed Net Salary</th>
+                                <th>Audited Integrity Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="anomalies_table_body">
+                            <!-- Filled Dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Behavioral Clustering View -->
+        <div id="behavior" class="tab-content">
+            <div class="header">
+                <h1>K-Means Behavioral Clusters</h1>
+                <p>Evaluate employee behavior trends mapped by average salaries versus leave frequencies across 3 clusters.</p>
+            </div>
+            
+            <div class="dashboard-grid" style="grid-template-columns: 1.2fr 1fr; margin-top: 0;">
+                <!-- Table list of employees and their clusters -->
+                <div class="table-card" style="margin-bottom: 0;">
+                    <h3 style="margin-bottom: 20px;">🤖 K-Means Clustering Profiles</h3>
+                    <div class="table-wrapper" style="max-height: 480px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Employee Name</th>
+                                    <th>Mapped Behavioral Profile</th>
+                                </tr>
+                            </thead>
+                            <tbody id="behavior_table_body">
+                                <!-- Filled Dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Scatter plot details / recommendations panel -->
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>📊 Cluster Distribution Schema</h3>
+                        </div>
+                        <canvas id="behaviorChart" style="max-height: 250px;"></canvas>
+                    </div>
+                    
+                    <div class="form-card">
+                        <h3>💡 Operational Guidelines</h3>
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+                            <div style="border-left: 3px solid var(--accent-green); padding-left: 15px;">
+                                <strong style="color: var(--accent-green); font-size: 13px; display: block;">NORMAL Cluster Profile</strong>
+                                <span style="font-size: 12px; color: var(--text-secondary);">Minimal leaves, stable payroll indexes. Represents standard active scheduling metrics.</span>
+                            </div>
+                            <div style="border-left: 3px solid var(--accent-amber); padding-left: 15px;">
+                                <strong style="color: var(--accent-amber); font-size: 13px; display: block;">HIGH RISK Cluster Profile</strong>
+                                <span style="font-size: 12px; color: var(--text-secondary);">Elevated leave ratios relative to salary tiers. Monitoring schedule modifications recommended.</span>
+                            </div>
+                            <div style="border-left: 3px solid var(--accent-red); padding-left: 15px;">
+                                <strong style="color: var(--accent-red); font-size: 13px; display: block;">FREQUENT LEAVE TAKER Profile</strong>
+                                <span style="font-size: 12px; color: var(--text-secondary);">Consistently high leave frequencies. HR team intervention and scheduling review indicated.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
 
 </div>
 
+<!-- Libraries: Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="./script.js"></script>
 

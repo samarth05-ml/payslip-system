@@ -36,7 +36,7 @@ def predict_leave(employee_id):
         prediction=int(prediction)
     )
 
-    from app import db
+    from database.db import db
     db.session.add(new_prediction)
     db.session.commit()
 
@@ -47,7 +47,7 @@ def predict_leave(employee_id):
 
 from sklearn.ensemble import IsolationForest
 import pandas as pd
-from app import db
+from database.db import db
 from database.models import Payslip, Anomaly
 
 
