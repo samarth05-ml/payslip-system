@@ -24,6 +24,9 @@ def apply_leave():
         approver = Employee.query.filter_by(role="MD").first()
     else:
         approver = None
+    # Fallback: If no dedicated HR/MD exists in the DB yet, assign the first registered employee
+    if not approver:
+       approver = Employee.query.first()
 
     if not approver:
         return jsonify({"error": "Approver not found"}), 404

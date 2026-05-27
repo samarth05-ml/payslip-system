@@ -94,6 +94,7 @@ window.onload = function() {
     setupSidebarNavigation();
     setupRoleSelector();
     detectBackendServer();
+    enforceRoleAccess();
 };
 
 // Automatically verify Flask API status
@@ -261,6 +262,8 @@ function setupRoleSelector() {
         document.getElementById("user_profile_role").innerText = state.currentRole === "Admin" ? "Global Payroll" : `Active Session: ${state.currentRole}`;
         
         addLogEntry("purple", `Switched session authority profile to ${state.currentRole}`, "Just now");
+        
+        enforceRoleAccess();
         
         // Refresh views like Leaves which contain role-based actions!
         if (state.isOnline) {
@@ -1147,4 +1150,94 @@ function renderBehaviorChart() {
             }
         }
     });
+}
+
+// ==========================================
+// PREMIUM ROLE-BASED ACCESS ENGINE
+// ==========================================
+function enforceRoleAccess() {
+    const role = state.currentRole; // "Admin", "HR", "MD", "Employee"
+    const navItems = document.querySelectorAll(".nav-item");
+    
+    navItems.forEach(item => {
+        const tab = item.getAttribute("data-tab");
+        
+        // Authorization mapping
+        let isAuthorized = true;
+        if (role === "Employee") {
+            if (tab === "employees" || tab === "anomalies" || tab === "behavior") {
+                isAuthorized = false;
+            }
+        } else if (role === "HR" || role === "MD") {
+            if (tab === "anomalies" || tab === "behavior") {
+                isAuthorized = false;
+            }
+        }
+        
+        if (isAuthorized) {
+            item.style.display = "flex";
+        } else {
+            item.style.display = "none";
+            // If the unauthorized tab was currently active, switch back to dashboard!
+            if (state.activeTab === tab) {
+                switchTab("dashboard");
+            }
+        }
+    });
+
+    // Enforce register form visibility on Employees tab
+    const registerFormCard = document.querySelector(".form-card");
+    if (registerFormCard) {
+        if (role === "Admin") {
+            registerFormCard.style.display = "block";
+        } else {
+            registerFormCard.style.display = "none";
+        }
+    }
+
+    // Enforce payslip generation form on Payslips tab
+    const generateForm = document.getElementById("generate_payslip_form");
+    if (generateForm) {
+        // If employee, hide form and show notice
+        let notice = document.getElementById("employee_payslip_notice");
+        if (role === "Employee") {
+            generateForm.style.display = "none";
+            if (!notice) {
+                notice = document.createElement("div");
+                notice.id = "employee_payslip_notice";
+                notice.className = "form-card";
+                notice.innerHTML = `<h3 style="color: var(--accent-amber);">🔒 Admin Locked</h3><p style="font-size: 13px; color: var(--text-muted); margin-top: 10px;">Payroll processing is locked to Finance/HR administrators.</p>`;
+                generateForm.parentNode.insertBefore(notice, generateForm);
+            } else {
+                notice.style.display = "block";
+            }
+        } else {
+            generateForm.style.display = "block";
+            if (notice) notice.style.display = "none";
+        }
+    }
+
+    // Enforce AI Predictor trigger on Leaves tab
+    const predictBtn = document.getElementById("run_prediction_btn");
+    const predictSelector = document.getElementById("predict_emp_id");
+    if (predictBtn && predictSelector) {
+        if (role === "Employee") {
+            predictBtn.disabled = true;
+            predictBtn.style.opacity = "0.5";
+            predictBtn.innerText = "Locked to HR/MD Session";
+            predictSelector.disabled = true;
+        } else {
+            predictBtn.disabled = false;
+            predictBtn.style.opacity = "1";
+            predictBtn.innerText = "Run AI Leave Forecast";
+            predictSelector.disabled = false;
+        }
+    }
+}
+
+function switchTab(tabId) {
+    const navItem = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
+    if (navItem) {
+        navItem.click();
+    }
 }

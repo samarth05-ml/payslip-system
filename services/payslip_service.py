@@ -10,7 +10,10 @@ def generate_payslip(employee_id, month):
         raise ValueError("Employee not found")
 
     #Get base salary calculations
-    hra, deductions, net_salary = calculate_salary(employee.basic_salary)
+    salary_details = calculate_salary(employee.basic_salary)
+    hra = salary_details["hra"]
+    deductions = salary_details["deductions"]
+    net_salary = salary_details["net_salary"]
 
     #NEW: Get approved leaves
     approved_leaves = Leave.query.filter_by(

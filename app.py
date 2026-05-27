@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from config import Config
 from database.db import db
@@ -10,7 +11,9 @@ from flask_cors import CORS
 app = Flask(__name__)
 app.config.from_object(Config)
 
-CORS(app)   # 🔥 THIS LINE WAS MISSING
+CORS(app)   
+# Create data directory dynamically if it does not exist
+os.makedirs(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data'), exist_ok=True)
 
 db.init_app(app)
 

@@ -1,3 +1,4 @@
+import os
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image, Spacer
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -27,6 +28,16 @@ def generate_pdf(payslip):
         [logo, Paragraph("Mahatma Gandhi Memorial Evening College", styles['Title'])]
     ])
 
+    # Header (Check logo file existence)
+    if os.path.exists("ymgm-logo.jpg"):
+        logo = Image("ymgm-logo.jpg", width=80, height=50)
+        header = Table([
+            [logo, Paragraph("Mahatma Gandhi Memorial Evening College", styles['Title'])]
+        ])
+    else:
+        header = Table([
+            [Paragraph("Mahatma Gandhi Memorial Evening College", styles['Title'])]
+       ])
     header.setStyle(TableStyle([
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ('LEFTPADDING', (0,0), (-1,-1), 10),

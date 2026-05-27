@@ -144,6 +144,10 @@ def get_employee_behavior():
     if df.empty:
         raise ValueError("No data available")
 
+    if len(employees) < 3:
+        # Return default or normal profiles without running KMeans
+       return [{"employee_id": emp.id, "behavior": "Normal"} for emp in employees]
+
     # Features
     X = df[["total_leaves", "avg_salary"]]
 

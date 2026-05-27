@@ -18,14 +18,14 @@ def add_employee():
         name=data['name'],
         email=data['email'],
         designation=data['designation'],
-        basic_salary=data['basic_salary']
+        basic_salary=data['basic_salary'],
+        role=data.get('role', 'Employee')
     )
 
     db.session.add(employee)
     db.session.commit()
 
     return jsonify({"message": "Employee added successfully"})
-
 @employee_bp.route('/get_employees', methods=['GET'])
 def get_employees():
     employees = Employee.query.all()
@@ -38,7 +38,8 @@ def get_employees():
             "name": emp.name,
             "email": emp.email,
             "designation": emp.designation,
-            "basic_salary": emp.basic_salary
+            "basic_salary": emp.basic_salary,
+            "role": emp.role
         })
 
     return jsonify(result)

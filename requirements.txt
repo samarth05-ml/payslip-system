@@ -1,2 +1,9 @@
 pandas
 scikit-learn
+flask
+flask-sqlalchemy
+flask-cors
+pandas
+scikit-learn
+joblib
+reportlab
