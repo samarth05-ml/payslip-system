@@ -45,27 +45,19 @@
 
         <!-- Topbar: Global Utility Panel -->
         <div class="topbar">
-            <!-- Active View Title -->
             <h3 id="current_panel_title">Dashboard Analytics</h3>
-            
+
             <div class="topbar-right">
-                <!-- Smart API Server Connection Status Badge -->
+                <!-- API Server Connection Status Badge -->
                 <div id="connection_badge" class="status-pill offline">
                     <span class="status-indicator"></span>
                     <span id="connection_text">Offline Demo Mode</span>
                 </div>
-                
-                <!-- Role-Switching Demonstration dropdown -->
-                <div class="role-container">
-                    <span>Active Session:</span>
-                    <select id="session_role" class="role-select">
-                        <option value="Admin">Administrator</option>
-                        <option value="HR">HR Officer</option>
-                        <option value="MD">Managing Director</option>
-                        <option value="Employee">Standard Employee</option>
-                    </select>
-                </div>
-                
+
+                <!-- ── ROLE SELECTOR REMOVED ──
+                     Role now comes from the real login session.
+                     The logout button is injected here by script.js. -->
+
                 <!-- Profile Indicator -->
                 <div class="profile">
                     <div class="profile-info">
@@ -83,8 +75,7 @@
                 <h1>Executive Summary</h1>
                 <p>Monitor metrics, analyze payroll distributions, and audit anomalies in real-time.</p>
             </div>
-            
-            <!-- Dashboard Stats Grid -->
+
             <div class="cards">
                 <div class="card card-employees">
                     <div class="card-info">
@@ -124,24 +115,19 @@
                 </div>
             </div>
 
-            <!-- Dashboard Analytics Layout -->
             <div class="dashboard-grid">
-                <!-- Salary Distribution Bar Chart -->
                 <div class="chart-card">
                     <div class="chart-header">
                         <h3>📊 Payroll Monthly Distributions</h3>
                     </div>
                     <canvas id="salaryChart" style="max-height: 330px;"></canvas>
                 </div>
-                
-                <!-- Dynamic Log of Events -->
+
                 <div class="recent-activity-panel">
                     <div class="panel-header">
                         <h3>🔔 Activity Log</h3>
                     </div>
-                    <div id="activity_log" class="activity-list">
-                        <!-- Filled Dynamically -->
-                    </div>
+                    <div id="activity_log" class="activity-list"></div>
                 </div>
             </div>
         </div>
@@ -152,9 +138,9 @@
                 <h1>Employee Directory</h1>
                 <p>Add and configure company personnel, base salaries, and designated operational access levels.</p>
             </div>
-            
+
             <div class="grid-form-split">
-                <!-- Form to Register New Employee -->
+                <!-- Register New Employee Form -->
                 <div class="form-card">
                     <h3>➕ Register Employee</h3>
                     <form id="add_employee_form">
@@ -182,13 +168,18 @@
                                 <option value="MD">Managing Director</option>
                             </select>
                         </div>
+                        <!-- ── NEW: Initial login password set by admin ── -->
+                        <div class="form-group">
+                            <label for="emp_password">Initial Login Password</label>
+                            <input type="password" id="emp_password" class="form-control" placeholder="Set a temporary password" required>
+                        </div>
                         <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 25px;">
                             Save Employee
                         </button>
                     </form>
                 </div>
-                
-                <!-- Table listing current employees -->
+
+                <!-- Employee Table -->
                 <div class="table-card" style="margin-bottom: 0;">
                     <div class="table-header-actions">
                         <h3>👥 Corporate Roster</h3>
@@ -207,9 +198,7 @@
                                     <th>System Role</th>
                                 </tr>
                             </thead>
-                            <tbody id="employee_table_body">
-                                <!-- Filled Dynamically -->
-                            </tbody>
+                            <tbody id="employee_table_body"></tbody>
                         </table>
                     </div>
                 </div>
@@ -222,9 +211,8 @@
                 <h1>Compensation Paycheck Generator</h1>
                 <p>Run payroll processing for individual employees and review professional corporate pay checks.</p>
             </div>
-            
+
             <div class="payslip-generator-layout">
-                <!-- Selection Panel -->
                 <div style="display: flex; flex-direction: column; gap: 20px;">
                     <div class="form-card">
                         <h3>⚙️ Payroll Parameters</h3>
@@ -233,7 +221,6 @@
                                 <label for="payslip_emp_id">Select Employee</label>
                                 <select id="payslip_emp_id" class="form-control" required style="background-color: var(--bg-primary);">
                                     <option value="" disabled selected>Select employee...</option>
-                                    <!-- Filled Dynamically -->
                                 </select>
                             </div>
                             <div class="form-group">
@@ -258,8 +245,7 @@
                             </button>
                         </form>
                     </div>
-                    
-                    <!-- Past Generated Payslips history card -->
+
                     <div class="table-card">
                         <h3 style="font-size: 14px; margin-bottom: 15px;">📜 Processed History</h3>
                         <div class="table-wrapper" style="max-height: 200px; overflow-y: auto;">
@@ -280,8 +266,7 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Interactive High-Fidelity Paycheck Printout Panel -->
+
                 <div style="display: flex; flex-direction: column; gap: 20px;">
                     <div class="table-card" style="margin-bottom: 0; padding: 25px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -290,12 +275,10 @@
                                 🖨️ Print Invoice
                             </button>
                         </div>
-                        
-                        <!-- Paycheck Structure -->
+
                         <div id="paycheck_target" class="paycheck-container">
                             <div class="paycheck-watermark">MGM Evening</div>
-                            
-                            <!-- Header Info -->
+
                             <div class="paycheck-header">
                                 <div class="paycheck-org">
                                     <h2>MGM EVENING COLLEGE</h2>
@@ -307,8 +290,7 @@
                                     <p id="invoice_serial">REF-MS-00000</p>
                                 </div>
                             </div>
-                            
-                            <!-- Employee metadata fields -->
+
                             <div class="paycheck-meta">
                                 <div class="meta-field">
                                     <span>Employee Name</span>
@@ -327,8 +309,7 @@
                                     <strong id="invoice_emp_email">-</strong>
                                 </div>
                             </div>
-                            
-                            <!-- Earnings vs Deductions Breakdown -->
+
                             <div class="paycheck-breakdown">
                                 <div class="breakdown-col">
                                     <div class="breakdown-title">Earnings Description</div>
@@ -345,7 +326,7 @@
                                         <strong>$0.00</strong>
                                     </div>
                                 </div>
-                                
+
                                 <div class="breakdown-col">
                                     <div class="breakdown-title">Deductions Description</div>
                                     <div class="breakdown-row">
@@ -362,14 +343,12 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Final Net salary block -->
+
                             <div class="paycheck-total">
                                 <h4>Total Corporate Net Salary Disbursed</h4>
                                 <p id="invoice_net_salary">$0.00</p>
                             </div>
-                            
-                            <!-- Signatures block -->
+
                             <div class="paycheck-footer">
                                 <div>This is a computer generated payroll invoice statement, signatures verified.</div>
                                 <div class="paycheck-signature">
@@ -388,11 +367,9 @@
                 <h1>Leaves & Predictive AI Console</h1>
                 <p>Apply for leaves, process administrative approvals, and leverage ML models to forecast leave probabilities.</p>
             </div>
-            
+
             <div class="ml-panel-grid">
-                <!-- Apply Leave and AI predictor panel -->
                 <div style="display: flex; flex-direction: column; gap: 20px;">
-                    <!-- Leave Application Card -->
                     <div class="form-card">
                         <h3>📅 Apply for Leave</h3>
                         <form id="apply_leave_form">
@@ -400,7 +377,6 @@
                                 <label for="leave_emp_id">Employee Name</label>
                                 <select id="leave_emp_id" class="form-control" required style="background-color: var(--bg-primary);">
                                     <option value="" disabled selected>Select employee...</option>
-                                    <!-- Filled Dynamically -->
                                 </select>
                             </div>
                             <div class="form-group">
@@ -412,22 +388,19 @@
                             </button>
                         </form>
                     </div>
-                    
-                    <!-- AI Prediction Card -->
+
                     <div class="form-card" style="border-color: rgba(139, 92, 246, 0.25);">
                         <h3 style="color: var(--accent-purple);">🔮 AI Leave Forecast Engine</h3>
                         <div class="form-group">
                             <label for="predict_emp_id">Evaluate Target Employee</label>
                             <select id="predict_emp_id" class="form-control" style="background-color: var(--bg-primary);">
                                 <option value="" disabled selected>Select employee...</option>
-                                <!-- Filled Dynamically -->
                             </select>
                         </div>
                         <button id="run_prediction_btn" class="btn-primary" style="width: 100%; justify-content: center; background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%);">
                             Run AI Leave Forecast
                         </button>
-                        
-                        <!-- Prediction scoring outputs -->
+
                         <div id="prediction_score_card" class="risk-meter-container" style="display: none;">
                             <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
                                 Machine Learning Assessment
@@ -442,11 +415,10 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Table listing current leaves/approvals queue -->
+
                 <div class="table-card" style="margin-bottom: 0;">
                     <div class="table-header-actions">
-                        <h3>⏳ Leaves & Approvals Stream</h3>
+                        <h3>Leaves & Approvals Stream</h3>
                     </div>
                     <div class="table-wrapper" style="max-height: 480px; overflow-y: auto;">
                         <table>
@@ -460,9 +432,7 @@
                                     <th>Action Queue</th>
                                 </tr>
                             </thead>
-                            <tbody id="leaves_table_body">
-                                <!-- Filled Dynamically -->
-                            </tbody>
+                            <tbody id="leaves_table_body"></tbody>
                         </table>
                     </div>
                 </div>
@@ -475,8 +445,7 @@
                 <h1>Salary Anomaly Audit Centre</h1>
                 <p>Trigger Isolation Forest anomaly detection algorithms to verify integrity across all generated payslips.</p>
             </div>
-            
-            <!-- Audit control header -->
+
             <div class="ai-audit-header-card">
                 <span class="pulse-circle"></span>
                 <h2>Unsupervised Isolation Forest Integrity Scan</h2>
@@ -485,8 +454,7 @@
                     Initiate Security Integrity Audit
                 </button>
             </div>
-            
-            <!-- Table displaying audited anomalies -->
+
             <div class="table-card">
                 <h3 style="margin-bottom: 20px;">🛡️ Flags & Anomaly Detections Log</h3>
                 <div class="table-wrapper" style="max-height: 400px; overflow-y: auto;">
@@ -499,9 +467,7 @@
                                 <th>Audited Integrity Status</th>
                             </tr>
                         </thead>
-                        <tbody id="anomalies_table_body">
-                            <!-- Filled Dynamically -->
-                        </tbody>
+                        <tbody id="anomalies_table_body"></tbody>
                     </table>
                 </div>
             </div>
@@ -513,9 +479,8 @@
                 <h1>K-Means Behavioral Clusters</h1>
                 <p>Evaluate employee behavior trends mapped by average salaries versus leave frequencies across 3 clusters.</p>
             </div>
-            
+
             <div class="dashboard-grid" style="grid-template-columns: 1.2fr 1fr; margin-top: 0;">
-                <!-- Table list of employees and their clusters -->
                 <div class="table-card" style="margin-bottom: 0;">
                     <h3 style="margin-bottom: 20px;">🤖 K-Means Clustering Profiles</h3>
                     <div class="table-wrapper" style="max-height: 480px; overflow-y: auto;">
@@ -527,14 +492,11 @@
                                     <th>Mapped Behavioral Profile</th>
                                 </tr>
                             </thead>
-                            <tbody id="behavior_table_body">
-                                <!-- Filled Dynamically -->
-                            </tbody>
+                            <tbody id="behavior_table_body"></tbody>
                         </table>
                     </div>
                 </div>
-                
-                <!-- Scatter plot details / recommendations panel -->
+
                 <div style="display: flex; flex-direction: column; gap: 20px;">
                     <div class="chart-card">
                         <div class="chart-header">
@@ -542,21 +504,21 @@
                         </div>
                         <canvas id="behaviorChart" style="max-height: 250px;"></canvas>
                     </div>
-                    
+
                     <div class="form-card">
                         <h3>💡 Operational Guidelines</h3>
                         <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
                             <div style="border-left: 3px solid var(--accent-green); padding-left: 15px;">
                                 <strong style="color: var(--accent-green); font-size: 13px; display: block;">NORMAL Cluster Profile</strong>
-                                <span style="font-size: 12px; color: var(--text-secondary);">Minimal leaves, stable payroll indexes. Represents standard active scheduling metrics.</span>
+                                <span style="font-size: 12px; color: var(--text-secondary);">Minimal leaves, stable payroll indexes.</span>
                             </div>
                             <div style="border-left: 3px solid var(--accent-amber); padding-left: 15px;">
                                 <strong style="color: var(--accent-amber); font-size: 13px; display: block;">HIGH RISK Cluster Profile</strong>
-                                <span style="font-size: 12px; color: var(--text-secondary);">Elevated leave ratios relative to salary tiers. Monitoring schedule modifications recommended.</span>
+                                <span style="font-size: 12px; color: var(--text-secondary);">Elevated leave ratios relative to salary tiers.</span>
                             </div>
                             <div style="border-left: 3px solid var(--accent-red); padding-left: 15px;">
                                 <strong style="color: var(--accent-red); font-size: 13px; display: block;">FREQUENT LEAVE TAKER Profile</strong>
-                                <span style="font-size: 12px; color: var(--text-secondary);">Consistently high leave frequencies. HR team intervention and scheduling review indicated.</span>
+                                <span style="font-size: 12px; color: var(--text-secondary);">Consistently high leave frequencies. HR intervention indicated.</span>
                             </div>
                         </div>
                     </div>
@@ -565,10 +527,8 @@
         </div>
 
     </div>
-
 </div>
 
-<!-- Libraries: Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="./script.js"></script>
 

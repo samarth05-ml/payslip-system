@@ -7,7 +7,8 @@ class Employee(db.Model):
     designation = db.Column(db.String(100))
     basic_salary = db.Column(db.Float)
     role = db.Column(db.String(50), default="Employee")
-
+    password_hash = db.Column(db.String(256))
+    
 class Payslip(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     employee_id = db.Column(db.Integer)
