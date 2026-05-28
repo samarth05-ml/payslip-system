@@ -385,10 +385,14 @@
   async function loadDashboard() {
     try {
       const [psRes, lvRes] = await Promise.all([
-        fetch('/api/my_payslips'),
-        fetch('/api/my_leaves')
+        fetch('/my_payslips'),
+        fetch('/my_leaves')
       ]);
-      const payslips = psRes.ok ? await psRes.json() : [];
+
+      // UPDATED
+      const psData = psRes.ok ? await psRes.json() : { data: [] };
+      const payslips = psData.data || [];
+
       const leaves   = lvRes.ok ? await lvRes.json() : [];
 
       document.getElementById('statPayslips').textContent = payslips.length;
@@ -427,9 +431,12 @@
   async function loadPayslips() {
     const tbody = document.getElementById('payslipTable');
     try {
-      const res  = await fetch('/api/my_payslips');
+      const res  = await fetch('/my_payslips');
       if (!res.ok) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Could not load payslips.</td></tr>'; return; }
-      const data = await res.json();
+
+      // UPDATED
+      const response = await res.json();
+      const data = response.data || [];
 
       if (data.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="empty">No payslips yet.</td></tr>';
@@ -460,7 +467,7 @@
   }
 
   async function downloadPayslip(id) {
-    window.open(`/api/payslip_pdf/${id}`, '_blank');
+    window.open(`/payslip_pdf/${id}`, '_blank');
   }
 
   /* ─────────────────────────────────────────
@@ -469,7 +476,7 @@
   async function loadLeaves() {
     const tbody = document.getElementById('leaveTable');
     try {
-      const res  = await fetch('/api/my_leaves');
+      const res  = await fetch('/my_leaves');
       if (!res.ok) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Could not load leaves.</td></tr>'; return; }
       const data = await res.json();
 
@@ -510,7 +517,7 @@
     if (new Date(to_date) < new Date(from_date)) { showToast('End date must be after start date.'); return; }
 
     try {
-      const res  = await fetch('/api/apply_leave', {
+      const res  = await fetch('/apply_leave', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ leave_type: leaveType, from_date, to_date, reason })
@@ -536,7 +543,7 @@
      Utilities
   ───────────────────────────────────────── */
   async function logout() {
-    await fetch('/api/logout', { method: 'POST' });
+    await fetch('/logout', { method: 'POST' });
     window.location.href = '/login';
   }
 

@@ -1,4 +1,5 @@
 from .db import db
+from datetime import datetime
 
 class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -21,17 +22,24 @@ class Payslip(db.Model):
 class Leave(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
-    employee_id = db.Column(db.Integer, nullable=False)  
-    # who applied leave
+    employee_id = db.Column(db.Integer, nullable=False)
 
-    days = db.Column(db.Integer, nullable=False)  
-    # number of leave days
+    leave_type = db.Column(db.String(50))
 
-    status = db.Column(db.String(20), default="Pending")  
-    # Pending / Approved / Rejected
+    from_date = db.Column(db.DateTime)
 
-    approver_id = db.Column(db.Integer)  
-    # who will approve (HR or MD)
+    to_date = db.Column(db.DateTime)
+
+    days = db.Column(db.Integer, nullable=False)
+
+    reason = db.Column(db.Text)
+
+    status = db.Column(db.String(20), default="Pending")
+
+    approver_id = db.Column(db.Integer)
+
+    submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 class Prediction(db.Model):
     id = db.Column(db.Integer, primary_key=True)

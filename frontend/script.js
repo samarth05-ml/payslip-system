@@ -698,46 +698,125 @@ function renderLeavesTable() {
     tbody.innerHTML = "";
 
     if (state.leaves.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No leaves requested. Try submitting one.</td></tr>`;
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;">
+                    No leaves requested. Try submitting one.
+                </td>
+            </tr>
+        `;
         return;
     }
 
     const sorted = [...state.leaves].sort((a, b) => {
-        if (a.status === "Pending" && b.status !== "Pending") return -1;
-        if (a.status !== "Pending" && b.status === "Pending") return 1;
+        const aPending = (a.status || "").toLowerCase() === "pending";
+        const bPending = (b.status || "").toLowerCase() === "pending";
+
+        if (aPending && !bPending) return -1;
+        if (!aPending && bPending) return 1;
+
         return b.id - a.id;
     });
 
     sorted.forEach(l => {
-        const emp     = state.employees.find(e => e.id === l.employee_id);
-        const empName = emp ? emp.name : `Employee ${l.employee_id}`;
 
-        let actionHTML = `<span style="color:var(--text-muted);font-size:11px;">Completed</span>`;
+        const emp = state.employees.find(e => e.id === l.employee_id);
 
-        if (l.status === "Pending") {
-            const approverEmp  = state.employees.find(e => e.id === l.approver_id);
-            const approverRole = approverEmp ? approverEmp.role : "HR";
+        const empName = emp
+            ? emp.name
+            : `Employee ${l.employee_id}`;
 
-            if (state.currentRole === approverRole || state.currentRole === "Admin") {
+        const status = (l.status || "").toLowerCase();
+
+        let actionHTML = `
+            <span style="color:var(--text-muted);font-size:11px;">
+                Completed
+            </span>
+        `;
+
+        // ONLY pending leaves should show action buttons
+        if (status === "pending") {
+
+            const approverEmp = state.employees.find(
+                e => e.id === l.approver_id
+            );
+
+            const approverRole = approverEmp
+                ? approverEmp.role
+                : "HR";
+
+            // HR/Admin/MD can approve
+            if (
+                state.currentRole === approverRole ||
+                state.currentRole === "Admin"
+            ) {
+
                 actionHTML = `
                     <div class="btn-action-group">
-                        <button class="btn-success" onclick="processLeaveApproval(${l.id},'Approved',${l.approver_id})">Approve</button>
-                        <button class="btn-danger"  onclick="processLeaveApproval(${l.id},'Rejected',${l.approver_id})">Reject</button>
-                    </div>`;
+                        <button
+                            class="btn-success"
+                            onclick="processLeaveApproval(${l.id}, 'Approved', ${l.approver_id})">
+                            Approve
+                        </button>
+
+                        <button
+                            class="btn-danger"
+                            onclick="processLeaveApproval(${l.id}, 'Rejected', ${l.approver_id})">
+                            Reject
+                        </button>
+                    </div>
+                `;
+
             } else {
-                actionHTML = `<span style="color:var(--accent-amber);font-size:11px;font-weight:500;">Awaiting ${approverRole}</span>`;
+
+                actionHTML = `
+                    <span style="
+                        color:var(--accent-amber);
+                        font-size:11px;
+                        font-weight:500;
+                    ">
+                        Awaiting ${approverRole}
+                    </span>
+                `;
             }
         }
 
+        const badgeStatus =
+            status === "approved"
+                ? "Approved"
+                : status === "rejected"
+                ? "Rejected"
+                : "Pending";
+
         const tr = document.createElement("tr");
+
         tr.innerHTML = `
             <td>#${l.id}</td>
-            <td class="emp-name-badge">${empName}</td>
-            <td><strong>${l.days}</strong> days</td>
-            <td>#${l.approver_id} (${getApproverDesignation(l.approver_id)})</td>
-            <td><span class="badge ${getLeaveBadgeColor(l.status)}">${l.status}</span></td>
-            <td>${actionHTML}</td>
+
+            <td class="emp-name-badge">
+                ${empName}
+            </td>
+
+            <td>
+                <strong>${l.days}</strong> days
+            </td>
+
+            <td>
+                #${l.approver_id}
+                (${getApproverDesignation(l.approver_id)})
+            </td>
+
+            <td>
+                <span class="badge ${getLeaveBadgeColor(badgeStatus)}">
+                    ${badgeStatus}
+                </span>
+            </td>
+
+            <td>
+                ${actionHTML}
+            </td>
         `;
+
         tbody.appendChild(tr);
     });
 }

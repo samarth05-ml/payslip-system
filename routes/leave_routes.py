@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, session
 from database.db import db
 from database.models import Leave, Employee
 from routes.decorators import login_required, admin_required
+from datetime import datetime
+
 
 leave_bp = Blueprint('leave', __name__)
 
@@ -10,10 +12,12 @@ ADMIN_ROLES = ('Admin', 'HR', 'MD')
 
 # ── POST /apply_leave ─────────────────────────────────────────
 # Employees submit their own leave; admins can submit on behalf of any employee.
+
 @leave_bp.route('/apply_leave', methods=['POST'])
 @login_required
 def apply_leave():
-    data = request.json
+
+    data = request.get_json()
 
     # Employees can only apply for themselves
     if session['user_role'] not in ADMIN_ROLES:
@@ -21,17 +25,39 @@ def apply_leave():
     else:
         employee_id = data.get('employee_id')
 
-    days = data.get('days')
+    leave_type = data.get('leave_type')
+    from_date  = data.get('from_date')
+    to_date    = data.get('to_date')
+    reason     = data.get('reason')
 
     employee = Employee.query.get(employee_id)
+
     if not employee:
-        return jsonify({"error": "Employee not found"}), 404
+        return jsonify({
+            "success": False,
+            "error": "Employee not found"
+        }), 404
+
+    # Calculate leave days
+    try:
+        from_dt = datetime.strptime(from_date, '%Y-%m-%d')
+        to_dt   = datetime.strptime(to_date, '%Y-%m-%d')
+
+        days = (to_dt - from_dt).days + 1
+
+    except Exception:
+        return jsonify({
+            "success": False,
+            "error": "Invalid date format"
+        }), 400
 
     # Decide approver based on role
     if employee.role == "Employee":
         approver = Employee.query.filter_by(role="HR").first()
+
     elif employee.role == "HR":
         approver = Employee.query.filter_by(role="MD").first()
+
     else:
         approver = None
 
@@ -39,23 +65,30 @@ def apply_leave():
         approver = Employee.query.first()
 
     if not approver:
-        return jsonify({"error": "Approver not found"}), 404
+        return jsonify({
+            "success": False,
+            "error": "Approver not found"
+        }), 404
 
     leave = Leave(
-        employee_id=employee_id,
-        days=days,
-        status="Pending",
-        approver_id=approver.id
+        employee_id = employee_id,
+        leave_type  = leave_type,
+        from_date   = from_dt,
+        to_date     = to_dt,
+        days        = days,
+        reason      = reason,
+        status      = "Pending",
+        approver_id = approver.id
     )
 
     db.session.add(leave)
     db.session.commit()
 
     return jsonify({
-        "message":     "Leave applied successfully",
+        "success": True,
+        "message": "Leave applied successfully",
         "approver_id": approver.id
     })
-
 
 # ── POST /approve_leave ───────────────────────────────────────
 @leave_bp.route('/approve_leave', methods=['POST'])
@@ -109,12 +142,19 @@ def leave_status(employee_id):
 @login_required
 def my_leaves():
     leaves = Leave.query.filter_by(employee_id=session['user_id']).all()
+
     result = []
+
     for leave in leaves:
         result.append({
-            "leave_id":   leave.id,
-            "days":       leave.days,
-            "status":     leave.status,
-            "approver_id":leave.approver_id
+            "leave_id":    leave.id,
+            "leave_type":  leave.leave_type,
+            "from_date":   leave.from_date,
+            "to_date":     leave.to_date,
+            "days":        leave.days,
+            "status":      leave.status,
+            "submitted_at": leave.submitted_at,
+            "approver_id": leave.approver_id
         })
+
     return jsonify(result)
