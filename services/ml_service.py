@@ -2,7 +2,8 @@ import pandas as pd
 import joblib
 
 from database.models import Employee, Leave, Payslip, Prediction
-
+from sklearn.ensemble import RandomForestClassifier
+import os
 
 def predict_leave(employee_id):
 
@@ -243,3 +244,42 @@ def get_analytics():
         "salary_trend": salary_trend,
         "leave_trend": leave_trend
     }
+
+
+
+def train_leave_model():
+    employees = Employee.query.all()
+    leaves    = Leave.query.all()
+    payslips  = Payslip.query.all()
+
+    data = []
+    for emp in employees:
+        emp_leaves   = [l for l in leaves if l.employee_id == emp.id and l.status == "Approved"]
+        emp_payslips = [p for p in payslips if p.employee_id == emp.id]
+
+        approved_leaves = sum([l.days for l in emp_leaves])
+        avg_salary = sum([p.net_salary for p in emp_payslips]) / len(emp_payslips) if emp_payslips else emp.basic_salary
+
+        # label: 1 = high risk (>5 leave days), 0 = low risk
+        label = 1 if approved_leaves > 5 else 0
+
+        data.append({
+            "basic_salary":    emp.basic_salary,
+            "approved_leaves": approved_leaves,
+            "avg_salary":      avg_salary,
+            "label":           label
+        })
+
+    df = pd.DataFrame(data)
+    if len(df) < 2:
+        raise ValueError("Not enough data to train model")
+
+    X = df[["basic_salary", "approved_leaves", "avg_salary"]]
+    y = df["label"]
+
+    model = RandomForestClassifier(random_state=42)
+    model.fit(X, y)
+
+    os.makedirs("ml", exist_ok=True)
+    joblib.dump(model, "ml/leave_model.pkl")
+    return "Model trained successfully"

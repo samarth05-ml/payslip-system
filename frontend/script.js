@@ -577,9 +577,9 @@ function renderPayslipHistoryTable(slips) {
             <td>${s.month}</td>
             <td style="font-weight:600;">$${s.net_salary.toLocaleString()}</td>
             <td>
-                <button class="btn-success" onclick="viewDetailedPayslip(${s.id},${s.employee_id},'${s.month}',${s.basic_salary},${s.hra},${s.deductions},${s.net_salary})" style="padding:4px 8px;font-size:10px;">
-                    Inspect Slip
-                </button>
+            <button class="btn-success" onclick="viewDetailedPayslip(${s.id},${s.employee_id},'${s.month}',${s.basic_salary},${s.hra},${s.deductions},${s.net_salary})" style="padding:4px 8px;font-size:10px;">
+            Inspect Slip
+            </button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -607,8 +607,15 @@ function viewDetailedPayslip(id, empId, month, basic, hra, deductions, net) {
     addLogEntry("green", `Loaded digital payroll paycheck for ${emp.name} (${month})`, "Just now");
 }
 
-document.getElementById("print_payslip_btn").addEventListener("click", () => window.print());
-
+document.getElementById("print_payslip_btn").addEventListener("click", () => {
+    const serial = document.getElementById("invoice_serial").innerText;
+    const id = parseInt(serial.replace("REF-MS-", ""));
+    if (id) {
+        window.open(`/payslip_pdf/${id}`, '_blank');
+    } else {
+        window.print();
+    }
+});
 document.getElementById("generate_payslip_form").addEventListener("submit", function(e) {
     e.preventDefault();
 

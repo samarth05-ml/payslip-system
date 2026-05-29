@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from routes.decorators import admin_required
 from services.ml_service import predict_leave
 
 ml_bp = Blueprint('ml', __name__)
@@ -98,3 +99,10 @@ def analytics():
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@ml_bp.route('/train_model', methods=['POST'])
+@admin_required
+def train_model():
+    from services.ml_service import train_leave_model
+    result = train_leave_model()
+    return jsonify({"message": result})

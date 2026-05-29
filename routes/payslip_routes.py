@@ -3,6 +3,8 @@ from services.payslip_service import generate_payslip
 from services.pdf_service import generate_pdf
 from database.models import Payslip
 from routes.decorators import login_required, admin_required
+from flask import send_file, abort
+import os
 
 payslip_bp = Blueprint('payslip', __name__)
 
@@ -78,3 +80,15 @@ def my_payslips():
         })
 
     return jsonify({"status": "success", "data": result})
+
+@payslip_bp.route('/payslip_pdf/<int:payslip_id>', methods=['GET'])
+@login_required
+def download_pdf(payslip_id):
+    from database.models import Payslip
+    payslip = Payslip.query.get(payslip_id)
+    if not payslip:
+        abort(404)
+
+    file_path = generate_pdf(payslip)
+
+    return send_file(file_path, as_attachment=True, download_name=f"payslip_{payslip_id}.pdf")
