@@ -1,6 +1,7 @@
 from database.models import Employee, Payslip, Leave
 from database.db import db
 from utils.salary_calculator import calculate_salary
+from datetime import datetime
 
 def generate_payslip(employee_id, month):
 
@@ -15,10 +16,20 @@ def generate_payslip(employee_id, month):
     deductions = salary_details["deductions"]
     net_salary = salary_details["net_salary"]
 
-    #NEW: Get approved leaves
-    approved_leaves = Leave.query.filter_by(
-        employee_id=employee_id,
-        status="Approved"
+    #Get approved leaves for this month only
+    try:
+        month_dt = datetime.strptime(f"{month} 2026", "%B %Y")
+    except ValueError:
+        month_dt = datetime.strptime(month, "%Y-%m")
+
+    month_start = month_dt.replace(day=1)
+    month_end   = month_dt.replace(day=28)
+
+    approved_leaves = Leave.query.filter(
+        Leave.employee_id == employee_id,
+        Leave.status      == "Approved",
+        Leave.from_date   >= month_start,
+        Leave.from_date   <= month_end
     ).all()
 
     total_leave_days = sum([leave.days for leave in approved_leaves])

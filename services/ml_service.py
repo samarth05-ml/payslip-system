@@ -229,13 +229,7 @@ def get_analytics():
 
     #Leave trend (FIXED bug here)
     for l in leaves:
-        
-        if hasattr(l, "month"):
-            month = l.month
-        else:
-            # fallback if no month field
-            month = "Unknown"
-
+        month = l.from_date.strftime("%Y-%m") if l.from_date else "Unknown"
         leave_data[month] += l.days
 
     leave_trend = []

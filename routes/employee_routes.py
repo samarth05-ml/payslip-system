@@ -1,15 +1,12 @@
+# AFTER — full employee_routes.py
 from flask import Blueprint, request, jsonify, session
 from database.db import db
 from database.models import Employee
 from routes.decorators import admin_required
-import hashlib
+from werkzeug.security import generate_password_hash
 
 
 employee_bp = Blueprint('employee', __name__)
-
-
-from routes.decorators import admin_required
-import hashlib
 
 @employee_bp.route('/add_employee', methods=['POST'])
 @admin_required
@@ -25,7 +22,7 @@ def add_employee():
         designation   = data['designation'],
         basic_salary  = data['basic_salary'],
         role          = data.get('role', 'Employee'),
-        password_hash = hashlib.sha256(data['password'].encode()).hexdigest()  # ← NEW
+        password_hash = generate_password_hash(data['password'])
     )
 
     db.session.add(employee)

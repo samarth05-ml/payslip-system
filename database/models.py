@@ -4,7 +4,7 @@ from datetime import datetime
 class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
-    email = db.Column(db.String(100))
+    email = db.Column(db.String(100),unique=True)
     designation = db.Column(db.String(100))
     basic_salary = db.Column(db.Float)
     role = db.Column(db.String(50), default="Employee")

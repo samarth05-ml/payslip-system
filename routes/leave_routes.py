@@ -96,17 +96,15 @@ def apply_leave():
 def approve_leave():
     data = request.json
 
-    leave_id    = data.get('leave_id')
-    status      = data.get('status')   # "Approved" / "Rejected"
-    approver_id = data.get('approver_id')
+    leave_id = data.get('leave_id')
+    status   = data.get('status')   # "Approved" / "Rejected"
 
     leave = Leave.query.get(leave_id)
     if not leave:
         return jsonify({"error": "Leave not found"}), 404
 
-    if leave.approver_id != approver_id:
+    if leave.approver_id != session['user_id']:
         return jsonify({"error": "You are not authorized to approve this leave"}), 403
-
     leave.status = status
     db.session.commit()
 

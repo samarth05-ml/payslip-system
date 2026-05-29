@@ -1,13 +1,9 @@
-import hashlib
+from werkzeug.security import check_password_hash
 from flask import Blueprint, request, jsonify, session
 from database.db import db
 from database.models import Employee
 
 auth_bp = Blueprint('auth', __name__)
-
-
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
 
 
 # ── POST /api/login ──────────────────────────────────────────
@@ -24,7 +20,7 @@ def login():
         db.func.lower(Employee.email) == email
     ).first()
 
-    if not employee or employee.password_hash != hash_password(password):
+    if not employee or not check_password_hash(employee.password_hash, password):
         return jsonify({'success': False, 'error': 'Invalid email or password'}), 401
 
     session['user_id']   = employee.id

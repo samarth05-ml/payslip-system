@@ -5,92 +5,75 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from database.models import Employee
 
-def generate_pdf(payslip):
-    file_name = f"payslip_{payslip.id}.pdf"
+BASE_DIR  = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+LOGO_PATH = os.path.join(BASE_DIR, 'frontend', 'assets', 'ymgm-logo.jpg')
+PDF_DIR   = os.path.join(BASE_DIR, 'data', 'pdfs')
 
-    #Create document
+def generate_pdf(payslip):
+    os.makedirs(PDF_DIR, exist_ok=True)
+    file_name = os.path.join(PDF_DIR, f"payslip_{payslip.id}.pdf")
+
     doc = SimpleDocTemplate(file_name, pagesize=letter)
     elements = []
-
     styles = getSampleStyleSheet()
 
-    #Get employee details (JOIN)
     employee = Employee.query.get(payslip.employee_id)
-
     if not employee:
         raise ValueError("Employee not found")
 
-    #Logo
-    logo = Image("ymgm-logo.jpg", width=80, height=50)
-
-    #Header (Logo + Company Name)
-    header = Table([
-        [logo, Paragraph("Mahatma Gandhi Memorial Evening College", styles['Title'])]
-    ])
-
-    # Header (Check logo file existence)
-    if os.path.exists("ymgm-logo.jpg"):
-        logo = Image("ymgm-logo.jpg", width=80, height=50)
+    # Header
+    if os.path.exists(LOGO_PATH):
+        logo = Image(LOGO_PATH, width=80, height=50)
         header = Table([
             [logo, Paragraph("Mahatma Gandhi Memorial Evening College", styles['Title'])]
         ])
     else:
         header = Table([
             [Paragraph("Mahatma Gandhi Memorial Evening College", styles['Title'])]
-       ])
+        ])
+
     header.setStyle(TableStyle([
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ('LEFTPADDING', (0,0), (-1,-1), 10),
     ]))
-
     elements.append(header)
 
-    #Payslip Title
+    # Payslip Title
     elements.append(Spacer(1, 20))
     elements.append(Paragraph("PAYSLIP", styles['Heading2']))
     elements.append(Spacer(1, 20))
 
-    #Employee Info Table
-    emp_data = [
-        ["Name", employee.name],
+    # Employee Info
+    emp_table = Table([
+        ["Name",        employee.name],
         ["Designation", employee.designation],
-        ["Month", payslip.month]
-    ]
-
-    emp_table = Table(emp_data, colWidths=[150, 250])
+        ["Month",       payslip.month]
+    ], colWidths=[150, 250])
     emp_table.setStyle(TableStyle([
-        ('GRID', (0,0), (-1,-1), 1, colors.black),
-        ('BACKGROUND', (0,0), (0,-1), colors.lightgrey)
+        ('GRID',       (0,0), (-1,-1), 1, colors.black),
+        ('BACKGROUND', (0,0), (0,-1),     colors.lightgrey)
     ]))
-
     elements.append(emp_table)
-
     elements.append(Spacer(1, 20))
 
-    #Salary Table
-    salary_data = [
-        ["Component", "Amount"],
-        ["Basic Salary", payslip.basic_salary],
-        ["HRA", payslip.hra],
-        ["Deductions", payslip.deductions],
-        ["Net Salary", payslip.net_salary]
-    ]
-
-    salary_table = Table(salary_data, colWidths=[200, 200])
+    # Salary Table
+    salary_table = Table([
+        ["Component",    "Amount"],
+        ["Basic Salary", f"Rs. {payslip.basic_salary:,.2f}"],
+        ["HRA",          f"Rs. {payslip.hra:,.2f}"],
+        ["Deductions",   f"Rs. {payslip.deductions:,.2f}"],
+        ["Net Salary",   f"Rs. {payslip.net_salary:,.2f}"]
+    ], colWidths=[200, 200])
     salary_table.setStyle(TableStyle([
-        ('GRID', (0,0), (-1,-1), 1, colors.black),
-        ('BACKGROUND', (0,0), (-1,0), colors.grey),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.white)
+        ('GRID',      (0,0), (-1,-1), 1, colors.black),
+        ('BACKGROUND',(0,0), (-1,0),     colors.grey),
+        ('TEXTCOLOR', (0,0), (-1,0),     colors.white)
     ]))
-
     elements.append(salary_table)
-
     elements.append(Spacer(1, 30))
 
-    #Footer
+    # Footer
     elements.append(Paragraph("This is a system generated payslip.", styles['Normal']))
 
-    #Build PDF
     doc.build(elements)
-
     return file_name

@@ -385,8 +385,8 @@
   async function loadDashboard() {
     try {
       const [psRes, lvRes] = await Promise.all([
-        fetch('/my_payslips'),
-        fetch('/my_leaves')
+        fetch('/my_payslips',{ credentials: 'include' }),
+        fetch('/my_leaves',{ credentials: 'include' })
       ]);
 
       // UPDATED
@@ -431,7 +431,7 @@
   async function loadPayslips() {
     const tbody = document.getElementById('payslipTable');
     try {
-      const res  = await fetch('/my_payslips');
+      const res  = await fetch('/my_payslips',{ credentials: 'include' });
       if (!res.ok) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Could not load payslips.</td></tr>'; return; }
 
       // UPDATED
@@ -476,7 +476,7 @@
   async function loadLeaves() {
     const tbody = document.getElementById('leaveTable');
     try {
-      const res  = await fetch('/my_leaves');
+      const res  = await fetch('/my_leaves',{ credentials: 'include' });
       if (!res.ok) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Could not load leaves.</td></tr>'; return; }
       const data = await res.json();
 
@@ -519,8 +519,10 @@
     try {
       const res  = await fetch('/apply_leave', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ leave_type: leaveType, from_date, to_date, reason })
+        body: JSON.stringify({ leave_type: leaveType, from_date, to_date, reason }),
+        
       });
       const data = await res.json();
 
@@ -543,7 +545,7 @@
      Utilities
   ───────────────────────────────────────── */
   async function logout() {
-    await fetch('/logout', { method: 'POST' });
+    await fetch('/api/logout', { method: 'POST', credentials: 'include' });
     window.location.href = '/login';
   }
 

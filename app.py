@@ -1,5 +1,5 @@
 import os
-import hashlib
+from werkzeug.security import generate_password_hash
 from flask import Flask, send_from_directory
 from config import Config
 from database.db import db
@@ -67,11 +67,11 @@ def _seed_admin():
             designation   = 'System Admin',
             basic_salary  = 0,
             role          = 'Admin',
-            password_hash = hashlib.sha256(b'admin123').hexdigest()
+            password_hash = generate_password_hash('admin123')
         )
         db.session.add(admin)
         db.session.commit()
-        print("✅ Default admin created: admin@company.com / admin123")
+        print(" Default admin created: admin@company.com / admin123")
 
 
 # Call after function is defined
