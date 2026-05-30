@@ -182,7 +182,7 @@
     /* ── STAT CARDS ── */
     .stats {
       display: grid;
-      grid-template-columns: repeat(2, 1fr); /* Forced 2x2 Structural Grid Matrix */
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem; margin-bottom: 1.5rem;
     }
 
@@ -407,7 +407,7 @@
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
 
     @media (max-width: 768px) {
-      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stats { grid-template-columns: 1fr 1fr; }
       .two-col { grid-template-columns: 1fr; }
       .form-grid { grid-template-columns: 1fr; }
       .topnav { padding: .75rem 1rem; }
@@ -424,6 +424,7 @@
 </head>
 <body>
 
+<!-- Nav -->
 <nav class="topnav">
   <div class="nav-brand">
     <img src="/frontend/assets/ymgm-logo.jpg" alt="Logo" style="width:36px;height:36px;border-radius:10px;object-fit:cover;" />
@@ -435,6 +436,7 @@
   </div>
 </nav>
 
+<!-- Tabs -->
 <div class="tabbar">
   <div class="tab active" onclick="showTab('dashboard', this)">
     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -450,8 +452,10 @@
   </div>
 </div>
 
+<!-- Content -->
 <div class="main">
 
+  <!-- DASHBOARD -->
   <div class="panel active" id="panel-dashboard">
 
     <div class="hero">
@@ -510,6 +514,7 @@
 
   </div>
 
+  <!-- PAYSLIPS -->
   <div class="panel" id="panel-payslips">
     <div class="card">
       <div class="card-header">
@@ -535,6 +540,7 @@
     </div>
   </div>
 
+  <!-- LEAVE -->
   <div class="panel" id="panel-leave">
     <div class="card">
       <div class="card-header">

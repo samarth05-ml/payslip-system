@@ -7,8 +7,9 @@
     <link rel="stylesheet" href="/frontend/styles.css">
 </head>
 <body>
-<!-- Background decorative shapes -->
-<div style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;">
+
+<!-- Background decorative shapes (z-index:-1 keeps behind all content) -->
+<div style="position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;">
   <svg style="position:absolute;left:-10%;top:-5%;width:55%;opacity:0.07;" viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg">
     <path d="M150,50 C250,20 400,80 450,200 C500,320 420,450 350,520 C280,590 150,600 80,500 C10,400 20,280 50,180 C80,80 50,80 150,50Z" fill="#3b82f6"/>
     <path d="M200,100 C300,60 430,130 470,260 C510,390 440,500 360,560 C280,620 160,610 100,510 C40,410 60,290 90,190 C120,90 100,140 200,100Z" fill="#6366f1" opacity="0.6"/>
@@ -31,6 +32,7 @@
     <path d="M90,50 C160,25 245,70 262,145 C279,220 222,288 148,300 C74,312 12,255 8,180 C4,105 20,75 90,50Z" fill="#34d399" opacity="0.5"/>
   </svg>
 </div>
+
 <div class="container">
 
     <!-- Sidebar Navigation -->
@@ -66,22 +68,14 @@
     <!-- Main Content Container -->
     <div class="main">
 
-        <!-- Topbar: Global Utility Panel -->
+        <!-- Topbar -->
         <div class="topbar">
             <h3 id="current_panel_title">Dashboard Analytics</h3>
-
             <div class="topbar-right">
-                <!-- API Server Connection Status Badge -->
                 <div id="connection_badge" class="status-pill offline">
                     <span class="status-indicator"></span>
                     <span id="connection_text">Offline Demo Mode</span>
                 </div>
-
-                <!-- ── ROLE SELECTOR REMOVED ──
-                     Role now comes from the real login session.
-                     The logout button is injected here by script.js. -->
-
-                <!-- Profile Indicator -->
                 <div class="profile">
                     <div class="profile-info">
                         <h4 id="user_profile_name">MGM Admin</h4>
@@ -92,7 +86,7 @@
             </div>
         </div>
 
-        <!-- Section 1: Dashboard View -->
+        <!-- Section 1: Dashboard -->
         <div id="dashboard" class="tab-content active">
             <div class="header">
                 <h1>Executive Summary</h1>
@@ -145,7 +139,6 @@
                     </div>
                     <canvas id="salaryChart" style="max-height: 330px;"></canvas>
                 </div>
-
                 <div class="recent-activity-panel">
                     <div class="panel-header">
                         <h3> Activity Log</h3>
@@ -155,7 +148,7 @@
             </div>
         </div>
 
-        <!-- Section 2: Manage Employees View -->
+        <!-- Section 2: Employees -->
         <div id="employees" class="tab-content">
             <div class="header">
                 <h1>Employee Directory</h1>
@@ -163,7 +156,6 @@
             </div>
 
             <div class="grid-form-split">
-                <!-- Register New Employee Form -->
                 <div class="form-card">
                     <h3> Register Employee</h3>
                     <form id="add_employee_form">
@@ -180,7 +172,7 @@
                             <input type="text" id="emp_designation" class="form-control" placeholder="e.g. Senior Lecturer" required>
                         </div>
                         <div class="form-group">
-                            <label for="emp_salary">Basic Salary (Monthly, $)</label>
+                            <label for="emp_salary">Basic Salary (Monthly)</label>
                             <input type="number" id="emp_salary" class="form-control" placeholder="e.g. 45000" min="1000" required>
                         </div>
                         <div class="form-group">
@@ -191,7 +183,6 @@
                                 <option value="MD">Managing Director</option>
                             </select>
                         </div>
-                        <!-- ── NEW: Initial login password set by admin ── -->
                         <div class="form-group">
                             <label for="emp_password">Initial Login Password</label>
                             <input type="password" id="emp_password" class="form-control" placeholder="Set a temporary password" required>
@@ -202,10 +193,9 @@
                     </form>
                 </div>
 
-                <!-- Employee Table -->
                 <div class="table-card" style="margin-bottom: 0;">
                     <div class="table-header-actions">
-                        <h3> Corporate Roster</h3>
+                        <h3>Corporate Roster</h3>
                         <div class="search-input-wrapper">
                             <input type="text" id="employee_search" class="search-input" placeholder="Search by name, email, role...">
                         </div>
@@ -228,7 +218,7 @@
             </div>
         </div>
 
-        <!-- Section 3: Generate Payslip View -->
+        <!-- Section 3: Generate Payslip -->
         <div id="payslips" class="tab-content">
             <div class="header">
                 <h1>Compensation Paycheck Generator</h1>
@@ -238,7 +228,7 @@
             <div class="payslip-generator-layout">
                 <div style="display: flex; flex-direction: column; gap: 20px;">
                     <div class="form-card">
-                        <h3> Payroll Parameters</h3>
+                        <h3>Payroll Parameters</h3>
                         <form id="generate_payslip_form">
                             <div class="form-group">
                                 <label for="payslip_emp_id">Select Employee</label>
@@ -270,7 +260,7 @@
                     </div>
 
                     <div class="table-card">
-                        <h3 style="font-size: 14px; margin-bottom: 15px;"> Processed History</h3>
+                        <h3 style="font-size: 14px; margin-bottom: 15px;">Processed History</h3>
                         <div class="table-wrapper" style="max-height: 200px; overflow-y: auto;">
                             <table>
                                 <thead>
@@ -301,7 +291,6 @@
 
                         <div id="paycheck_target" class="paycheck-container">
                             <div class="paycheck-watermark">MGM Evening</div>
-
                             <div class="paycheck-header">
                                 <div class="paycheck-org">
                                     <h2>MGM EVENING COLLEGE</h2>
@@ -338,38 +327,37 @@
                                     <div class="breakdown-title">Earnings Description</div>
                                     <div class="breakdown-row">
                                         <span>Basic Base Salary</span>
-                                        <strong id="invoice_basic_salary">$0.00</strong>
+                                        <strong id="invoice_basic_salary">₹0.00</strong>
                                     </div>
                                     <div class="breakdown-row">
                                         <span>HRA (House Rent Allowance)</span>
-                                        <strong id="invoice_hra">$0.00</strong>
+                                        <strong id="invoice_hra">₹0.00</strong>
                                     </div>
                                     <div class="breakdown-row" style="border-bottom: none;">
                                         <span>Special Benefits</span>
-                                        <strong>$0.00</strong>
+                                        <strong>₹0.00</strong>
                                     </div>
                                 </div>
-
                                 <div class="breakdown-col">
                                     <div class="breakdown-title">Deductions Description</div>
                                     <div class="breakdown-row">
                                         <span>Salary Deductions</span>
-                                        <strong id="invoice_deductions" style="color: #ef4444;">$0.00</strong>
+                                        <strong id="invoice_deductions" style="color: #ef4444;">₹0.00</strong>
                                     </div>
                                     <div class="breakdown-row">
                                         <span>Professional Taxes</span>
-                                        <strong style="color: #ef4444;">$0.00</strong>
+                                        <strong style="color: #ef4444;">₹0.00</strong>
                                     </div>
                                     <div class="breakdown-row" style="border-bottom: none;">
                                         <span>Provident Fund</span>
-                                        <strong style="color: #ef4444;">$0.00</strong>
+                                        <strong style="color: #ef4444;">₹0.00</strong>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="paycheck-total">
                                 <h4>Total Corporate Net Salary Disbursed</h4>
-                                <p id="invoice_net_salary">$0.00</p>
+                                <p id="invoice_net_salary">₹0.00</p>
                             </div>
 
                             <div class="paycheck-footer">
@@ -384,7 +372,7 @@
             </div>
         </div>
 
-        <!-- Section 4: Leave Management & ML Prediction View -->
+        <!-- Section 4: Leave Management -->
         <div id="leaves" class="tab-content">
             <div class="header">
                 <h1>Leaves & Predictive AI Console</h1>
@@ -462,7 +450,7 @@
             </div>
         </div>
 
-        <!-- Section 5: AI Anomaly Detector View -->
+        <!-- Section 5: AI Anomaly Detector -->
         <div id="anomalies" class="tab-content">
             <div class="header">
                 <h1>Salary Anomaly Audit Centre</h1>
@@ -479,7 +467,7 @@
             </div>
 
             <div class="table-card">
-                <h3 style="margin-bottom: 20px;"> Flags & Anomaly Detections Log</h3>
+                <h3 style="margin-bottom: 20px;">Flags & Anomaly Detections Log</h3>
                 <div class="table-wrapper" style="max-height: 400px; overflow-y: auto;">
                     <table>
                         <thead>
@@ -496,7 +484,7 @@
             </div>
         </div>
 
-        <!-- Section 6: Behavioral Clustering View -->
+        <!-- Section 6: Behavioral Clustering -->
         <div id="behavior" class="tab-content">
             <div class="header">
                 <h1>K-Means Behavioral Clusters</h1>
