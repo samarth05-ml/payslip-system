@@ -3,301 +3,543 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Portal — PaySlip System</title>
+  <title>My Portal — MGM Payroll</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #f5f3ef; --card: #fff; --ink: #0f0f12;
-      --muted: #6b7280; --border: #e2ddd6;
-      --accent: #2563eb; --accent2: #1d4ed8;
-      --green: #059669; --red: #dc2626;
-      --nav: #0f0f12;
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #16161f;
+      --border: rgba(255,255,255,0.07);
+      --ink: #f0eff8;
+      --muted: #7c7c9a;
+      --accent: #6c63ff;
+      --accent2: #9b8fff;
+      --green: #22c55e;
+      --green-dim: rgba(34,197,94,0.12);
+      --red: #f87171;
+      --yellow: #fbbf24;
+      --glow: rgba(108,99,255,0.15);
     }
 
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-    /* ── top nav ── */
+    /* noise overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .4;
+    }
+
+    /* ── NAV ── */
     .topnav {
-      background: var(--nav);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .85rem 2rem;
       position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
     }
 
     .nav-brand {
-      font-family: 'DM Serif Display', serif;
-      color: #fff; font-size: 1.15rem; display: flex; align-items: center; gap: .6rem;
+      display: flex; align-items: center; gap: .75rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem; color: var(--ink);
     }
 
-    .nav-mark {
-      width: 30px; height: 30px; background: var(--accent);
-      border-radius: 7px; display: flex; align-items: center;
-      justify-content: center; font-size: .9rem; color: #fff; font-weight: 700;
+    .nav-logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700;
+      box-shadow: 0 0 20px var(--glow);
     }
 
     .nav-right { display: flex; align-items: center; gap: 1rem; }
 
-    .nav-name { color: #d1d5db; font-size: .9rem; }
-
-    .btn-logout {
-      background: rgba(255,255,255,.1); color: #fff;
-      border: 1px solid rgba(255,255,255,.15);
-      border-radius: 8px; padding: .4rem .9rem;
-      font-family: inherit; font-size: .85rem;
-      cursor: pointer; transition: background .2s;
+    .nav-greeting {
+      font-size: .82rem; color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: .4rem .9rem; border-radius: 20px;
     }
 
-    .btn-logout:hover { background: rgba(255,255,255,.18); }
+    .nav-greeting span { color: var(--accent2); font-weight: 600; }
 
-    /* ── tab bar ── */
+    .btn-logout {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: .4rem .9rem;
+      font-family: inherit; font-size: .82rem;
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── TABS ── */
     .tabbar {
-      background: var(--card); border-bottom: 1px solid var(--border);
-      display: flex; gap: 0; padding: 0 2rem;
+      display: flex; gap: 0;
+      padding: 0 2.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 65px; z-index: 99;
     }
 
     .tab {
-      padding: 1rem 1.25rem;
-      font-size: .9rem; font-weight: 500; color: var(--muted);
-      cursor: pointer; border-bottom: 2.5px solid transparent;
-      transition: color .2s, border-color .2s;
       display: flex; align-items: center; gap: .5rem;
+      padding: 1rem 1.4rem;
+      font-size: .85rem; font-weight: 600;
+      color: var(--muted); cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .2s; letter-spacing: .02em;
+      text-transform: uppercase; font-size: .75rem;
     }
 
-    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab.active { color: var(--accent2); border-bottom-color: var(--accent); }
     .tab:hover:not(.active) { color: var(--ink); }
 
-    /* ── main ── */
-    .main { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem; }
+    /* ── LAYOUT ── */
+    .main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem; position: relative; z-index: 1; }
 
-    /* ── panels ── */
     .panel { display: none; }
-    .panel.active { display: block; }
+    .panel.active { display: block; animation: fadeUp .35s ease; }
 
-    /* ── stats grid ── */
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── WELCOME HERO ── */
+    .hero {
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #1a1040 0%, #0f0f1a 50%, #0a1628 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(108,99,255,.35) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute; bottom: -40px; left: 30%;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(34,197,94,.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-label {
+      font-size: .72rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--accent2);
+      margin-bottom: .6rem;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem; line-height: 1.2;
+      color: var(--ink); margin-bottom: .5rem;
+    }
+
+    .hero-sub { font-size: .9rem; color: var(--muted); }
+
+    .hero-badge {
+      position: absolute; top: 2rem; right: 2rem;
+      background: var(--green-dim);
+      border: 1px solid rgba(34,197,94,.3);
+      border-radius: 20px; padding: .35rem .9rem;
+      font-size: .75rem; font-weight: 600; color: var(--green);
+      display: flex; align-items: center; gap: .4rem;
+    }
+
+    .hero-badge::before {
+      content: ''; width: 7px; height: 7px;
+      background: var(--green); border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .5; transform: scale(.8); }
+    }
+
+    /* ── STAT CARDS ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* Forced 2x2 Structural Grid Matrix */
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
 
     .stat-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 14px; padding: 1.25rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.4rem;
+      position: relative; overflow: hidden;
+      transition: transform .2s, border-color .2s;
     }
 
-    .stat-label { font-size: .78rem; font-weight: 600; text-transform: uppercase;
-      letter-spacing: .05em; color: var(--muted); margin-bottom: .5rem; }
+    .stat-card:hover { transform: translateY(-3px); border-color: rgba(108,99,255,.3); }
 
-    .stat-val { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--ink); }
-
-    .stat-sub { font-size: .8rem; color: var(--muted); margin-top: .25rem; }
-
-    /* ── section cards ── */
-    .section-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;
+    .stat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      border-radius: 16px 16px 0 0;
     }
 
-    .section-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.25rem; margin-bottom: 1.25rem;
+    .stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--green), #86efac); }
+    .stat-card:nth-child(3)::before { background: linear-gradient(90deg, var(--yellow), #fde68a); }
+    .stat-card:nth-child(4)::before { background: linear-gradient(90deg, #f472b6, #e879f9); }
+
+    .stat-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; margin-bottom: .9rem;
     }
 
-    /* ── table ── */
+    .stat-card:nth-child(1) .stat-icon { background: rgba(108,99,255,.15); }
+    .stat-card:nth-child(2) .stat-icon { background: rgba(34,197,94,.15); }
+    .stat-card:nth-child(3) .stat-icon { background: rgba(251,191,36,.15); }
+    .stat-card:nth-child(4) .stat-icon { background: rgba(244,114,182,.15); }
+
+    .stat-label { font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--muted); margin-bottom: .4rem; }
+
+    .stat-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; color: var(--ink); line-height: 1;
+    }
+
+    .stat-sub { font-size: .75rem; color: var(--muted); margin-top: .3rem; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px; padding: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem; color: var(--ink);
+      display: flex; align-items: center; gap: .6rem;
+    }
+
+    .card-title-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+
+    /* ── ACTIVITY FEED ── */
+    .activity-item {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: .9rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-top: 5px; flex-shrink: 0;
+      background: var(--accent);
+    }
+
+    .activity-text { font-size: .88rem; color: var(--ink); line-height: 1.5; }
+    .activity-time { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
+
+    /* ── TABLE ── */
     .table-wrap { overflow-x: auto; }
 
     table { width: 100%; border-collapse: collapse; }
 
+    thead tr { border-bottom: 1px solid var(--border); }
+
     th {
-      font-size: .75rem; font-weight: 600; text-transform: uppercase;
-      letter-spacing: .05em; color: var(--muted);
-      padding: .6rem .75rem; text-align: left;
-      border-bottom: 1px solid var(--border);
+      font-size: .7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--muted);
+      padding: .75rem 1rem; text-align: left;
     }
 
     td {
-      padding: .75rem; font-size: .9rem;
-      border-bottom: 1px solid var(--border);
+      padding: 1rem; font-size: .88rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--ink);
     }
 
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #fafaf9; }
+
+    tbody tr { transition: background .15s; }
+    tbody tr:hover td { background: rgba(108,99,255,.05); }
+
+    .amount { font-family: 'Playfair Display', serif; font-size: 1rem; }
+    .amount-net { color: var(--green); }
 
     .btn-dl {
-      background: var(--accent); color: #fff;
-      border: none; border-radius: 7px;
-      padding: .35rem .75rem; font-size: .8rem; font-family: inherit;
-      cursor: pointer; transition: background .2s;
+      background: rgba(108,99,255,.15);
+      color: var(--accent2);
+      border: 1px solid rgba(108,99,255,.3);
+      border-radius: 8px;
+      padding: .35rem .8rem; font-size: .78rem; font-family: inherit;
+      cursor: pointer; transition: all .2s;
       display: inline-flex; align-items: center; gap: .35rem;
     }
 
-    .btn-dl:hover { background: var(--accent2); }
+    .btn-dl:hover {
+      background: var(--accent);
+      color: #fff; border-color: var(--accent);
+      box-shadow: 0 4px 15px var(--glow);
+    }
 
-    /* ── leave form ── */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-    .field { display: flex; flex-direction: column; gap: .4rem; }
+    /* ── LEAVE FORM ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .field { display: flex; flex-direction: column; gap: .5rem; }
     .field.full { grid-column: 1 / -1; }
 
-    label { font-size: .78rem; font-weight: 600; text-transform: uppercase;
-      letter-spacing: .05em; color: var(--muted); }
+    label {
+      font-size: .7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--muted);
+    }
 
     input, select, textarea {
-      padding: .65rem .9rem; border: 1.5px solid var(--border);
-      border-radius: 9px; font-family: inherit; font-size: .9rem;
-      background: var(--bg); color: var(--ink); outline: none;
-      transition: border-color .2s;
+      padding: .75rem 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit; font-size: .9rem;
+      color: var(--ink); outline: none;
+      transition: all .2s;
+      -webkit-appearance: none;appearance: none;
     }
 
     input:focus, select:focus, textarea:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37,99,235,.1);
-      background: #fff;
+      box-shadow: 0 0 0 3px rgba(108,99,255,.15);
+      background: #111118;
     }
 
-    textarea { resize: vertical; min-height: 90px; }
+    select option { background: #111118; }
+
+    textarea { resize: vertical; min-height: 100px; }
 
     .btn-submit {
-      background: var(--accent); color: #fff;
-      border: none; border-radius: 10px;
-      padding: .8rem 2rem; font-family: inherit; font-size: .95rem; font-weight: 600;
-      cursor: pointer; transition: background .2s;
-      margin-top: .5rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; border: none; border-radius: 12px;
+      padding: .9rem 2.5rem;
+      font-family: inherit; font-size: .9rem; font-weight: 700;
+      cursor: pointer; transition: all .25s;
+      margin-top: .75rem; letter-spacing: .03em;
+      box-shadow: 0 4px 20px var(--glow);
     }
 
-    .btn-submit:hover { background: var(--accent2); }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(108,99,255,.4);
+    }
 
+    /* ── BADGES ── */
+    .badge-status {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .25rem .7rem; border-radius: 20px;
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .badge-status::before {
+      content: ''; width: 5px; height: 5px; border-radius: 50%;
+    }
+
+    .badge-pending  { background: rgba(251,191,36,.12); color: var(--yellow); border: 1px solid rgba(251,191,36,.25); }
+    .badge-pending::before { background: var(--yellow); }
+    .badge-approved { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,.25); }
+    .badge-approved::before { background: var(--green); }
+    .badge-rejected { background: rgba(248,113,113,.1); color: var(--red); border: 1px solid rgba(248,113,113,.25); }
+    .badge-rejected::before { background: var(--red); }
+
+    /* ── EMPTY STATE ── */
+    .empty {
+      text-align: center; padding: 3rem;
+      color: var(--muted); font-size: .88rem;
+    }
+
+    .empty-icon { font-size: 2.5rem; margin-bottom: .75rem; opacity: .4; }
+
+    /* ── TOAST ── */
     .toast {
       position: fixed; bottom: 2rem; right: 2rem;
-      background: var(--ink); color: #fff;
-      padding: .75rem 1.25rem; border-radius: 10px;
-      font-size: .9rem; z-index: 999;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      padding: .9rem 1.5rem; border-radius: 12px;
+      font-size: .88rem; z-index: 999;
       transform: translateY(20px); opacity: 0;
       transition: all .3s;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 30px rgba(0,0,0,.5);
+      max-width: 320px;
     }
 
     .toast.show { transform: translateY(0); opacity: 1; }
 
-    .empty { text-align: center; padding: 2.5rem; color: var(--muted); font-size: .9rem; }
+    /* ── TWO COL LAYOUT ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
 
-    .badge-status {
-      display: inline-block; padding: .2rem .6rem; border-radius: 20px;
-      font-size: .75rem; font-weight: 600;
-    }
-
-    .badge-pending  { background: #fef3c7; color: #92400e; }
-    .badge-approved { background: #d1fae5; color: #065f46; }
-    .badge-rejected { background: #fee2e2; color: #991b1b; }
-
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
       .form-grid { grid-template-columns: 1fr; }
       .topnav { padding: .75rem 1rem; }
-      .tabbar { padding: 0 .5rem; }
-      .main { padding: 1rem; }
+      .tabbar { padding: 0 .5rem; overflow-x: auto; }
+      .main { padding: 1.25rem 1rem; }
+      .hero-title { font-size: 1.6rem; }
+      .hero-badge { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .stats { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- Top Nav -->
 <nav class="topnav">
   <div class="nav-brand">
-    <div class="nav-mark">₹</div>
-    PaySlip System
+    <img src="/frontend/assets/ymgm-logo.jpg" alt="Logo" style="width:36px;height:36px;border-radius:10px;object-fit:cover;" />
+    MGM Payroll
   </div>
   <div class="nav-right">
-    <span class="nav-name" id="navName">Loading…</span>
+    <div class="nav-greeting">Welcome back, <span id="navName">…</span></div>
     <button class="btn-logout" onclick="logout()">Sign Out</button>
   </div>
 </nav>
 
-<!-- Tab Bar -->
 <div class="tabbar">
   <div class="tab active" onclick="showTab('dashboard', this)">
-    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-      <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-    </svg>
-    Dashboard
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Overview
   </div>
   <div class="tab" onclick="showTab('payslips', this)">
-    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-    </svg>
-    My Payslips
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    Payslips
   </div>
   <div class="tab" onclick="showTab('leave', this)">
-    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-    </svg>
-    Leave Application
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    Leave
   </div>
 </div>
 
-<!-- Main Content -->
 <div class="main">
 
-  <!-- DASHBOARD -->
   <div class="panel active" id="panel-dashboard">
-    <div class="stats" id="statsGrid">
+
+    <div class="hero">
+      <div class="hero-badge">Active Employee</div>
+      <div class="hero-label">Employee Self-Service Portal</div>
+      <div class="hero-title" id="heroTitle">Good day 👋</div>
+      <div class="hero-sub">Here's a snapshot of your payroll and leave status.</div>
+    </div>
+
+    <div class="stats">
       <div class="stat-card">
-        <div class="stat-label">Payslips Generated</div>
+        <div class="stat-icon">📄</div>
+        <div class="stat-label">Payslips</div>
         <div class="stat-val" id="statPayslips">—</div>
         <div class="stat-sub">All time</div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon">✅</div>
         <div class="stat-label">Leaves Taken</div>
         <div class="stat-val" id="statLeaves">—</div>
-        <div class="stat-sub">This year</div>
+        <div class="stat-sub">Approved</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Pending Leaves</div>
+        <div class="stat-icon">⏳</div>
+        <div class="stat-label">Pending</div>
         <div class="stat-val" id="statPending">—</div>
         <div class="stat-sub">Awaiting approval</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Last Net Salary</div>
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">Last Net Pay</div>
         <div class="stat-val" id="statSalary">—</div>
-        <div class="stat-sub">Most recent payslip</div>
+        <div class="stat-sub">Most recent</div>
       </div>
     </div>
 
-    <div class="section-card">
-      <div class="section-title">Recent Activity</div>
-      <div id="recentActivity">
-        <div class="empty">No recent activity.</div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Recent Activity</div>
+        </div>
+        <div id="recentActivity">
+          <div class="empty"><div class="empty-icon">🔔</div>No recent activity.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Leave Summary</div>
+        </div>
+        <div id="leaveSummary">
+          <div class="empty"><div class="empty-icon">📅</div>No leave data.</div>
+        </div>
       </div>
     </div>
+
   </div>
 
-  <!-- MY PAYSLIPS -->
   <div class="panel" id="panel-payslips">
-    <div class="section-card">
-      <div class="section-title">My Payslips</div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-title-dot"></div>My Payslips</div>
+      </div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
               <th>Month</th>
-              <th>Basic Salary</th>
-              <th>Bonus</th>
+              <th>Basic</th>
+              <th>HRA</th>
               <th>Deductions</th>
               <th>Net Pay</th>
-              <th>Generated On</th>
               <th>PDF</th>
             </tr>
           </thead>
           <tbody id="payslipTable">
-            <tr><td colspan="7" class="empty">Loading…</td></tr>
+            <tr><td colspan="6" class="empty">Loading…</td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- LEAVE APPLICATION -->
   <div class="panel" id="panel-leave">
-    <div class="section-card">
-      <div class="section-title">Apply for Leave</div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-title-dot"></div>Apply for Leave</div>
+      </div>
       <div class="form-grid">
         <div class="field">
           <label>Leave Type</label>
@@ -305,7 +547,7 @@
             <option value="casual">Casual Leave</option>
             <option value="sick">Sick Leave</option>
             <option value="earned">Earned Leave</option>
-            <option value="maternity">Maternity/Paternity</option>
+            <option value="maternity">Maternity / Paternity</option>
           </select>
         </div>
         <div class="field"></div>
@@ -322,17 +564,17 @@
           <textarea id="leaveReason" placeholder="Briefly describe the reason for your leave…"></textarea>
         </div>
       </div>
-      <button class="btn-submit" onclick="submitLeave()">Submit Application</button>
+      <button class="btn-submit" onclick="submitLeave()">Submit Application →</button>
     </div>
 
-    <div class="section-card">
-      <div class="section-title">My Leave History</div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-title-dot"></div>Leave History</div>
+      </div>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr>
-              <th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Submitted</th>
-            </tr>
+            <tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Submitted</th></tr>
           </thead>
           <tbody id="leaveTable">
             <tr><td colspan="6" class="empty">Loading…</td></tr>
@@ -347,31 +589,26 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  /* ─────────────────────────────────────────
-     Bootstrap: verify session, load data
-  ───────────────────────────────────────── */
   async function init() {
-    const res  = await fetch('/api/me');
+    const res  = await fetch('/api/me', { credentials: 'include' });
     if (!res.ok) { window.location.href = '/login'; return; }
     const data = await res.json();
     if (!data.logged_in) { window.location.href = '/login'; return; }
 
-    // Redirect admins to the main dashboard
-    if (['admin', 'hr', 'md'].includes(data.role)) {
-      window.location.href = '/';
-      return;
+    if (['Admin','HR','MD'].includes(data.role)) {
+      window.location.href = '/'; return;
     }
 
     document.getElementById('navName').textContent = data.name;
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    document.getElementById('heroTitle').textContent = `${greet}, ${data.name.split(' ')[0]} 👋`;
 
     loadDashboard();
     loadPayslips();
     loadLeaves();
   }
 
-  /* ─────────────────────────────────────────
-     Tabs
-  ───────────────────────────────────────── */
   function showTab(name, el) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -379,109 +616,113 @@
     el.classList.add('active');
   }
 
-  /* ─────────────────────────────────────────
-     Dashboard
-  ───────────────────────────────────────── */
   async function loadDashboard() {
     try {
       const [psRes, lvRes] = await Promise.all([
-        fetch('/my_payslips',{ credentials: 'include' }),
-        fetch('/my_leaves',{ credentials: 'include' })
+        fetch('/my_payslips', { credentials: 'include' }),
+        fetch('/my_leaves',   { credentials: 'include' })
       ]);
 
-      // UPDATED
-      const psData = psRes.ok ? await psRes.json() : { data: [] };
+      const psData   = psRes.ok ? await psRes.json() : { data: [] };
       const payslips = psData.data || [];
-
       const leaves   = lvRes.ok ? await lvRes.json() : [];
 
       document.getElementById('statPayslips').textContent = payslips.length;
-      document.getElementById('statLeaves').textContent   =
-        leaves.filter(l => l.status === 'approved').length;
-      document.getElementById('statPending').textContent  =
-        leaves.filter(l => l.status === 'pending').length;
+      document.getElementById('statLeaves').textContent   = leaves.filter(l => l.status === 'Approved').length;
+      document.getElementById('statPending').textContent  = leaves.filter(l => l.status === 'Pending').length;
 
       if (payslips.length > 0) {
-        const last = payslips[0];
-        document.getElementById('statSalary').textContent =
-          '₹' + Number(last.net_salary || 0).toLocaleString('en-IN');
+        const last = payslips[payslips.length - 1];
+        document.getElementById('statSalary').textContent = '₹' + Number(last.net_salary || 0).toLocaleString('en-IN');
       }
 
-      // Recent activity list
-      const activity = [];
-      payslips.slice(0, 3).forEach(p =>
-        activity.push(`Payslip generated for ${p.month || 'N/A'} — ₹${Number(p.net_salary||0).toLocaleString('en-IN')}`));
-      leaves.slice(0, 3).forEach(l =>
-        activity.push(`Leave application (${l.leave_type}) — ${l.status}`));
-
+      // Recent activity
       const box = document.getElementById('recentActivity');
+      const activity = [];
+      payslips.slice(-3).reverse().forEach(p =>
+        activity.push({ text: `Payslip for <strong>${p.month}</strong>`, sub: `Net ₹${Number(p.net_salary||0).toLocaleString('en-IN')}`, dot: '#6c63ff' }));
+      leaves.slice(-3).reverse().forEach(l =>
+        activity.push({ text: `${l.leave_type} leave — <strong>${l.status}</strong>`, sub: `${l.from_date || ''}`, dot: l.status === 'Approved' ? '#22c55e' : l.status === 'Rejected' ? '#f87171' : '#fbbf24' }));
+
       if (activity.length === 0) {
-        box.innerHTML = '<div class="empty">No recent activity.</div>';
+        box.innerHTML = '<div class="empty"><div class="empty-icon">🔔</div>No recent activity.</div>';
       } else {
-        box.innerHTML = activity.map(a =>
-          `<div style="padding:.6rem 0; border-bottom:1px solid var(--border); font-size:.9rem">${a}</div>`
-        ).join('');
+        box.innerHTML = activity.map(a => `
+          <div class="activity-item">
+            <div class="activity-dot" style="background:${a.dot}"></div>
+            <div>
+              <div class="activity-text">${a.text}</div>
+              <div class="activity-time">${a.sub}</div>
+            </div>
+          </div>`).join('');
       }
+
+      // Leave summary
+      const lsBox = document.getElementById('leaveSummary');
+      const approved = leaves.filter(l => l.status === 'Approved').length;
+      const pending  = leaves.filter(l => l.status === 'Pending').length;
+      const rejected = leaves.filter(l => l.status === 'Rejected').length;
+      lsBox.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:.75rem;margin-top:.25rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.15);border-radius:10px">
+            <span style="font-size:.85rem;color:var(--muted)">Approved</span>
+            <span style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--green)">${approved}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.15);border-radius:10px">
+            <span style="font-size:.85rem;color:var(--muted)">Pending</span>
+            <span style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--yellow)">${pending}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.15);border-radius:10px">
+            <span style="font-size:.85rem;color:var(--muted)">Rejected</span>
+            <span style="font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--red)">${rejected}</span>
+          </div>
+        </div>`;
     } catch (e) { console.error(e); }
   }
 
-  /* ─────────────────────────────────────────
-     Payslips
-  ───────────────────────────────────────── */
   async function loadPayslips() {
     const tbody = document.getElementById('payslipTable');
     try {
-      const res  = await fetch('/my_payslips',{ credentials: 'include' });
-      if (!res.ok) { tbody.innerHTML = '<tr><td colspan="7" class="empty">Could not load payslips.</td></tr>'; return; }
-
-      // UPDATED
+      const res  = await fetch('/my_payslips', { credentials: 'include' });
+      if (!res.ok) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Could not load payslips.</td></tr>'; return; }
       const response = await res.json();
       const data = response.data || [];
 
       if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty">No payslips yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">📄</div>No payslips generated yet.</div></td></tr>';
         return;
       }
 
       tbody.innerHTML = data.map(p => `
         <tr>
-          <td>${p.month || '—'}</td>
-          <td>₹${Number(p.basic_salary||0).toLocaleString('en-IN')}</td>
-          <td>₹${Number(p.bonus||0).toLocaleString('en-IN')}</td>
-          <td>₹${Number(p.deductions||0).toLocaleString('en-IN')}</td>
-          <td><strong>₹${Number(p.net_salary||0).toLocaleString('en-IN')}</strong></td>
-          <td>${p.created_at ? new Date(p.created_at).toLocaleDateString('en-IN') : '—'}</td>
+          <td><strong>${p.month || '—'}</strong></td>
+          <td class="amount">₹${Number(p.basic_salary||0).toLocaleString('en-IN')}</td>
+          <td class="amount">₹${Number(p.hra||0).toLocaleString('en-IN')}</td>
+          <td class="amount" style="color:var(--red)">₹${Number(p.deductions||0).toLocaleString('en-IN')}</td>
+          <td class="amount amount-net">₹${Number(p.net_salary||0).toLocaleString('en-IN')}</td>
           <td>
             <button class="btn-dl" onclick="downloadPayslip(${p.id})">
-              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/>
-              </svg>
+              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>
               PDF
             </button>
           </td>
-        </tr>
-      `).join('');
+        </tr>`).join('');
     } catch (e) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty">Error loading data.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="empty">Error loading data.</td></tr>';
     }
   }
 
-  async function downloadPayslip(id) {
-    window.open(`/payslip_pdf/${id}`, '_blank');
-  }
+  function downloadPayslip(id) { window.open(`/payslip_pdf/${id}`, '_blank'); }
 
-  /* ─────────────────────────────────────────
-     Leaves
-  ───────────────────────────────────────── */
   async function loadLeaves() {
     const tbody = document.getElementById('leaveTable');
     try {
-      const res  = await fetch('/my_leaves',{ credentials: 'include' });
+      const res  = await fetch('/my_leaves', { credentials: 'include' });
       if (!res.ok) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Could not load leaves.</td></tr>'; return; }
       const data = await res.json();
 
-      if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty">No leave applications yet.</td></tr>';
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">📅</div>No leave applications yet.</div></td></tr>';
         return;
       }
 
@@ -489,17 +730,15 @@
         const from  = new Date(l.from_date);
         const to    = new Date(l.to_date);
         const days  = Math.round((to - from) / 86400000) + 1;
-        const badge = {pending:'badge-pending', approved:'badge-approved', rejected:'badge-rejected'}[l.status] || 'badge-pending';
-        return `
-          <tr>
-            <td>${l.leave_type}</td>
-            <td>${from.toLocaleDateString('en-IN')}</td>
-            <td>${to.toLocaleDateString('en-IN')}</td>
-            <td>${days}</td>
-            <td><span class="badge-status ${badge}">${l.status}</span></td>
-            <td>${l.submitted_at ? new Date(l.submitted_at).toLocaleDateString('en-IN') : '—'}</td>
-          </tr>
-        `;
+        const s     = (l.status || 'pending').toLowerCase();
+        return `<tr>
+          <td>${l.leave_type}</td>
+          <td>${from.toLocaleDateString('en-IN')}</td>
+          <td>${to.toLocaleDateString('en-IN')}</td>
+          <td><strong>${days}</strong></td>
+          <td><span class="badge-status badge-${s}">${l.status}</span></td>
+          <td style="color:var(--muted);font-size:.82rem">${l.submitted_at ? new Date(l.submitted_at).toLocaleDateString('en-IN') : '—'}</td>
+        </tr>`;
       }).join('');
     } catch (e) {
       tbody.innerHTML = '<tr><td colspan="6" class="empty">Error loading data.</td></tr>';
@@ -507,10 +746,10 @@
   }
 
   async function submitLeave() {
-    const leaveType   = document.getElementById('leaveType').value;
-    const from_date   = document.getElementById('leaveFrom').value;
-    const to_date     = document.getElementById('leaveTo').value;
-    const reason      = document.getElementById('leaveReason').value.trim();
+    const leaveType = document.getElementById('leaveType').value;
+    const from_date = document.getElementById('leaveFrom').value;
+    const to_date   = document.getElementById('leaveTo').value;
+    const reason    = document.getElementById('leaveReason').value.trim();
 
     if (!from_date || !to_date) { showToast('Please select both dates.'); return; }
     if (!reason) { showToast('Please provide a reason.'); return; }
@@ -521,29 +760,21 @@
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ leave_type: leaveType, from_date, to_date, reason }),
-        
+        body: JSON.stringify({ leave_type: leaveType, from_date, to_date, reason })
       });
       const data = await res.json();
-
       if (data.success) {
-        showToast('Leave application submitted successfully!');
-        document.getElementById('leaveFrom').value  = '';
-        document.getElementById('leaveTo').value    = '';
+        showToast(' Leave application submitted!');
+        document.getElementById('leaveFrom').value   = '';
+        document.getElementById('leaveTo').value     = '';
         document.getElementById('leaveReason').value = '';
-        loadLeaves();
-        loadDashboard();
+        loadLeaves(); loadDashboard();
       } else {
         showToast(data.error || 'Failed to submit leave.');
       }
-    } catch (e) {
-      showToast('Network error. Please try again.');
-    }
+    } catch (e) { showToast('Network error. Please try again.'); }
   }
 
-  /* ─────────────────────────────────────────
-     Utilities
-  ───────────────────────────────────────── */
   async function logout() {
     await fetch('/api/logout', { method: 'POST', credentials: 'include' });
     window.location.href = '/login';
@@ -553,7 +784,7 @@
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+    setTimeout(() => t.classList.remove('show'), 3500);
   }
 
   init();
