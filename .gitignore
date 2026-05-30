@@ -1,13 +1,60 @@
-# Virtual Environment
+# ── Virtual Environments ──────────────────────────────────────
 venv/
 env/
 payslip_env/
+.venv/
 
-# Python cache
+# ── Python Cache ──────────────────────────────────────────────
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
 
-# Database
+# ── Database ──────────────────────────────────────────────────
 data/payslip.db
+*.db
+*.sqlite
+*.sqlite3
 
-# VS Code (optional)
+# ── Generated PDFs ───────────────────────────────────────────
+data/pdfs/
+*.pdf
+
+# ── ML Model Files ───────────────────────────────────────────
+ml/*.pkl
+ml/*.joblib
+ml/*.model
+
+# ── Environment Variables ────────────────────────────────────
+.env
+.env.local
+.env.production
+config.local.py
+
+# ── IDE & Editor ─────────────────────────────────────────────
 .vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# ── Logs ─────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── One-time Scripts ─────────────────────────────────────────
+fix_admin.py
+fix_passwords.py
+test_login.py
+run_once_rehash.py
+
+# ── OS Files ─────────────────────────────────────────────────
+.DS_Store
+Desktop.ini
+
+# ── Distribution / Build ─────────────────────────────────────
+dist/
+build/
+*.egg-info/

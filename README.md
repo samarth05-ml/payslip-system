@@ -1,133 +1,214 @@
-# Payslip and Leave Management System
+# MGM Payslip Analytics & Management Console
 
-## Overview
-This project is a backend system built using Flask that manages employees, leave requests, approval workflows, and generates payslips with salary deductions and PDF export functionality.
+A full-stack payroll management system built with Flask and vanilla JavaScript, featuring ML-powered leave forecasting, salary anomaly detection, employee behavioral clustering, and a modern glassmorphism UI.
 
 ---
 
 ## Features
 
-### Employee Management
-- Add employee details
-- Store employee information such as name, email, designation, salary, and role
+### Authentication
+- Secure session-based login with role-based access (Admin, HR, MD, Employee)
+- Passwords hashed using werkzeug scrypt (salted, production-safe)
+- Protected routes via server-side session decorators
 
-### Leave Management
-- Apply for leave
-- Role-based approval system:
-  - Employee requests are approved by HR
-  - HR requests are approved by MD
-- View leave status
-- View pending leave requests for approvers
+###  Employee Management
+- Add, view, and search employees
+- Role assignment (Employee / HR / MD)
+- Admin sets initial login password
 
-### Payroll System
-- Generate payslips
-- Automatic salary calculation
-- Salary deduction based on approved leaves
+###  Leave Management
+- Employees apply for leave with date range and reason
+- Role-based approval workflow:
+  - Employee → approved by HR
+  - HR → approved by MD
+- Month-scoped leave deduction on payslip generation
 
-### PDF Generation
-- Generate payslip as a PDF file
-- Includes company logo
-- Displays structured salary breakdown
+###  Payroll System
+- Generate payslips per employee per month
+- Auto salary calculation (Basic + HRA − Deductions)
+- Leave days deducted from net salary for the relevant month only
+
+###  PDF Generation
+- Professional payslip PDF with company branding
+- Colour-coded salary breakdown, net pay highlight, footer
+- Download from both employee and admin dashboards
+
+###  AI / ML Features
+- **Leave Forecast Engine** — Random Forest model predicts leave likelihood
+- **Salary Anomaly Audit** — Isolation Forest flags irregular payslip data
+- **Behavioral Clustering** — K-Means groups employees by leave and salary patterns
+- **Analytics Dashboard** — Monthly salary trends and leave trend charts
+
+###  UI
+- Admin/HR dashboard with aurora gradient background and glass morphism cards
+- Employee self-service portal with dark theme
+- Responsive layout for desktop and tablet
 
 ---
 
 ## Tech Stack
-- Python
-- Flask
-- SQLAlchemy
-- SQLite
-- ReportLab
+
+| Layer | Technology |
+|---|---|
+| Backend | Python, Flask |
+| Database | SQLAlchemy + SQLite |
+| ML | scikit-learn, pandas, joblib |
+| PDF | ReportLab |
+| Frontend | HTML, CSS, Vanilla JS, Chart.js |
+| Auth | Flask Sessions + werkzeug |
 
 ---
 
 ## Project Structure
 
+```
 payslip-system/
 │
+├── app.py                  # Flask app entry point, seed admin
+├── config.py               # App configuration
+├── requirements.txt
+│
 ├── database/
-│   ├── db.py
-│   └── models.py
+│   ├── db.py               # SQLAlchemy instance
+│   └── models.py           # Employee, Payslip, Leave, Anomaly, Prediction
 │
 ├── routes/
-│   ├── employee_routes.py
-│   ├── leave_routes.py
-│   └── payslip_routes.py
+│   ├── auth_routes.py      # /api/login, /api/logout, /api/me
+│   ├── employee_routes.py  # /add_employee, /get_employees
+│   ├── leave_routes.py     # /apply_leave, /approve_leave, /my_leaves
+│   ├── payslip_routes.py   # /generate_payslip, /my_payslips, /payslip_pdf
+│   ├── ml_routes.py        # /predict_leave, /detect_anomalies, /get_analytics
+│   └── decorators.py       # login_required, admin_required
 │
 ├── services/
-│   ├── payslip_service.py
-│   └── pdf_service.py
+│   ├── payslip_service.py  # Payslip generation logic
+│   ├── pdf_service.py      # ReportLab PDF generation
+│   └── ml_service.py       # ML model training and inference
 │
 ├── utils/
 │   └── salary_calculator.py
 │
-├── assets/
-│   └── ymgm-logo.png
+├── ml/                     # Trained model files (.pkl) — gitignored
 │
-├── app.py
-├── payslip.db
-├── requirements.txt
-└── README.md
+├── data/                   # SQLite DB and generated PDFs — gitignored
+│   ├── payslip.db
+│   └── pdfs/
+│
+└── frontend/
+    ├── index.html          # Admin/HR dashboard
+    ├── employee.html       # Employee self-service portal
+    ├── login.html          # Login page
+    ├── script.js           # Admin dashboard JS
+    ├── styles.css          # Global styles
+    └── assets/             # Icons, logo
+```
 
 ---
 
 ## Setup Instructions
 
 ### 1. Clone the repository
-git clone https://github.com/samarth05-ml/payslip-system.git  
+```bash
+git clone https://github.com/samarth05-ml/payslip-system.git
+cd payslip-system
+```
 
-### 2. Create virtual environment
-python -m venv venv  
+### 2. Create and activate virtual environment
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
 
-### 3. Activate virtual environment
-venv\Scripts\activate   (Windows)
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
+```
 
-### 4. Install dependencies
-pip install -r requirements.txt  
+### 3. Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
-### 5. Run the application
-python app.py  
+### 4. Run the application
+```bash
+python app.py
+```
+
+### 5. Open in browser
+```
+http://127.0.0.1:5000/login
+```
+
+### 6. Default admin login
+```
+Email:  abc  
+Password: abc
+```
+
+>  Change the admin password immediately after first login in production.
 
 ---
 
 ## API Endpoints
 
-### Employee
-POST /add_employee  
-GET /get_employees  
+### Auth
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/login` | Login with email and password |
+| POST | `/api/logout` | Clear session |
+| GET | `/api/me` | Get current session user |
 
-### Leave
-POST /apply_leave  
-POST /approve_leave  
-GET /leave_status/<employee_id>  
-GET /pending_leaves/<approver_id>  
+### Employees
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/add_employee` | Register new employee (Admin) |
+| GET | `/get_employees` | List all employees (Admin/HR) |
 
-### Payslip
-POST /generate_payslip  
+### Leaves
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/apply_leave` | Submit leave application |
+| POST | `/approve_leave` | Approve or reject leave (Admin/HR) |
+| GET | `/my_leaves` | Get current employee's leaves |
+| GET | `/pending_leaves` | Get leaves pending approval |
+
+### Payslips
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/generate_payslip` | Generate payslip for employee |
+| GET | `/my_payslips` | Get current employee's payslips |
+| GET | `/payslip_pdf/<id>` | Download payslip as PDF |
+
+### ML / Analytics
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/predict_leave` | Run leave forecast for employee |
+| POST | `/detect_anomalies` | Run salary anomaly audit |
+| GET | `/get_analytics` | Get salary and leave trend data |
+| GET | `/get_employee_behavior` | Get K-Means cluster assignments |
 
 ---
 
-## Key Concepts
-- Role-based approval workflow
-- Leave tracking and deduction logic
-- Modular backend architecture
-- RESTful API design
+## Security Notes
 
----
-
-## Future Enhancements
-- Frontend user interface using React or HTML/CSS
-- Machine learning features such as:
-  - Leave prediction
-  - Salary anomaly detection
-  - Employee behavior analysis
-- Authentication using JWT
+- Passwords are hashed using `werkzeug.security.generate_password_hash` (scrypt algorithm)
+- All sensitive routes protected by server-side session checks
+- `approver_id` for leave approval is taken from session, not client request body
+- Secret key should be set via environment variable in production:
+  ```bash
+  set SECRET_KEY=your-random-secret-key   # Windows
+  export SECRET_KEY=your-random-secret-key # Linux/macOS
+  ```
 
 ---
 
 ## Author
-Samarth
+
+**Samarth Prabhu**  
+MGM Evening College, Udupi
 
 ---
 
-## Description
-This project demonstrates a backend system with real-world business logic, database integration, and document generation.
+## License
+
+This project is for academic and demonstration purposes.
