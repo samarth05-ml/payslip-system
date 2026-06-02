@@ -8,6 +8,7 @@ let state = {
     anomalies: [],
     predictions: [],
     
+    attendance: [],
     // UI session variables
     isOnline: false,
     currentRole: "Admin", // Set from real session, not dropdown
@@ -447,12 +448,27 @@ function renderEmployeeTable() {
     state.employees.forEach(emp => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td>#${emp.id}</td>
-            <td class="emp-name-badge">${emp.name}<br><span style="font-size:11px;color:var(--text-muted);font-weight:normal;">${emp.email}</span></td>
-            <td>${emp.designation}</td>
-            <td style="font-weight:600;color:var(--text-primary);">$${emp.basic_salary.toLocaleString()}</td>
-            <td><span class="badge ${getRoleColor(emp.role)}">${emp.role}</span></td>
-        `;
+    <td>#${emp.id}</td>
+    <td class="emp-name-badge">${emp.name}<br>
+        <span style="font-size:11px;color:var(--text-muted);font-weight:normal;">
+            ${emp.email}
+        </span>
+    </td>
+    <td>${emp.designation}</td>
+    <td style="font-weight:600;color:var(--text-primary);">
+        $${emp.basic_salary.toLocaleString()}
+    </td>
+    <td>
+        <span class="badge ${getRoleColor(emp.role)}">${emp.role}</span>
+    </td>
+    <td>
+        <button
+            class="btn-danger"
+            onclick="deleteEmployee(${emp.id})">
+            Delete
+        </button>
+    </td>
+`;
         tbody.appendChild(tr);
     });
 }
@@ -534,12 +550,30 @@ document.getElementById("employee_search").addEventListener("input", function(e)
     filtered.forEach(emp => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td>#${emp.id}</td>
-            <td class="emp-name-badge">${emp.name}<br><span style="font-size:11px;color:var(--text-muted);">${emp.email}</span></td>
-            <td>${emp.designation}</td>
-            <td style="font-weight:600;">$${emp.basic_salary.toLocaleString()}</td>
-            <td><span class="badge ${getRoleColor(emp.role)}">${emp.role}</span></td>
-        `;
+    <td>#${emp.id}</td>
+    <td class="emp-name-badge">
+        ${emp.name}<br>
+        <span style="font-size:11px;color:var(--text-muted);">
+            ${emp.email}
+        </span>
+    </td>
+    <td>${emp.designation}</td>
+    <td style="font-weight:600;">
+        $${emp.basic_salary.toLocaleString()}
+    </td>
+    <td>
+        <span class="badge ${getRoleColor(emp.role)}">
+            ${emp.role}
+        </span>
+    </td>
+    <td>
+        <button
+            class="btn-danger"
+            onclick="deleteEmployee(${emp.id})">
+            Delete
+        </button>
+    </td>
+`;
         tbody.appendChild(tr);
     });
 });
@@ -754,8 +788,7 @@ function renderLeavesTable() {
 
             // HR/Admin/MD can approve
             if (
-                state.currentRole === approverRole ||
-                state.currentRole === "Admin"
+                state.currentRole === approverRole || state.currentRole === "Admin"
             ) {
 
                 actionHTML = `
@@ -1184,4 +1217,84 @@ function enforceRoleAccess() {
 function switchTab(tabId) {
     const navItem = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
     if (navItem) navItem.click();
+}
+
+async function deleteEmployee(id) {
+
+    if (!confirm("Are you sure you want to delete this employee?")) {
+        return;
+    }
+
+    if (state.isOnline) {
+
+        try {
+
+            const res = await fetch(
+                `${BACKEND_URL}/delete_employee/${id}`,
+                {
+                    method: "DELETE",
+                    credentials: "include"
+                }
+            );
+
+            const data = await res.json();
+
+            if (data.status === "success") {
+
+                addLogEntry(
+                    "red",
+                    `Employee #${id} deleted`,
+                    "Just now"
+                );
+
+                loadRealData();
+
+            } else {
+                alert(data.message || "Delete failed");
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("Delete request failed");
+        }
+
+    } else {
+
+        state.employees =
+            state.employees.filter(emp => emp.id !== id);
+
+        addLogEntry(
+            "red",
+            `Employee #${id} removed from offline data`,
+            "Just now"
+        );
+
+        refreshAppUI();
+    }
+}
+
+async function checkIn(employeeId){
+
+    await fetch("/checkin",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            employee_id:employeeId
+        })
+    });
+}
+
+async function checkOut(employeeId){
+
+    await fetch("/checkout",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            employee_id:employeeId
+        })
+    });
 }

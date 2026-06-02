@@ -45,6 +45,13 @@ def apply_leave():
 
         days = (to_dt - from_dt).days + 1
 
+        is_half_day = data.get("is_half_day", False)
+
+        if is_half_day:
+            days = 0.5
+        else:
+            days = (to_dt - from_dt).days + 1
+
     except Exception:
         return jsonify({
             "success": False,
@@ -78,7 +85,8 @@ def apply_leave():
         days        = days,
         reason      = reason,
         status      = "Pending",
-        approver_id = approver.id
+        approver_id = approver.id,
+        is_half_day=is_half_day
     )
 
     db.session.add(leave)
@@ -106,6 +114,12 @@ def approve_leave():
     if leave.approver_id != session['user_id']:
         return jsonify({"error": "You are not authorized to approve this leave"}), 403
     leave.status = status
+
+    if status == "Approved":
+
+        employee = Employee.query.get(leave.employee_id)
+
+        employee.leave_balance -= leave.days
     db.session.commit()
 
     return jsonify({"message": f"Leave {status.lower()} successfully"})
@@ -156,3 +170,13 @@ def my_leaves():
         })
 
     return jsonify(result)
+
+@leave_bp.route('/leave_balance/<int:id>')
+@login_required
+def leave_balance(id):
+
+    employee = Employee.query.get(id)
+
+    return jsonify({
+        "leave_balance": employee.leave_balance
+    })

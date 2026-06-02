@@ -10,6 +10,11 @@ from routes.ml_routes import ml_bp
 from routes.auth_routes import auth_bp          # ← NEW
 from flask_cors import CORS
 from flask import redirect,session
+from routes.attendance_routes import attendance_bp
+from routes.expense_routes import expense_bp
+from routes.holiday_routes import holiday_bp
+
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -27,7 +32,9 @@ app.register_blueprint(payslip_bp)
 app.register_blueprint(leave_bp)
 app.register_blueprint(ml_bp)
 app.register_blueprint(auth_bp)                # ← NEW
-
+app.register_blueprint(attendance_bp)
+app.register_blueprint(expense_bp)
+app.register_blueprint(holiday_bp)
 with app.app_context():
     db.create_all()
 

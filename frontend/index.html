@@ -62,6 +62,20 @@
             <li class="nav-item" data-tab="behavior">
                 <img src="/frontend/assets/behavior.svg" class="icon" alt="Behavior"> <span>Behavior Clusters</span>
             </li>
+            <li class="nav-item" data-tab="attendance">
+                <img src="/frontend/assets/settings.svg" class="icon" alt="Attendance">
+                <span>Attendance</span>
+            </li>
+
+            <li class="nav-item" data-tab="expenses">
+                <img src="/frontend/assets/settings.svg" class="icon" alt="Expenses">
+                <span>Expenses</span>
+            </li>
+
+            <li class="nav-item" data-tab="holidays">
+                <img src="/frontend/assets/settings.svg" class="icon" alt="Holidays">
+                <span>Holidays</span>
+            </li>
         </ul>
     </div>
 
@@ -130,7 +144,10 @@
                         <img src="/frontend/assets/anomaly.svg" alt="Anomalies">
                     </div>
                 </div>
-            </div>
+            
+
+                
+        </div>
 
             <div class="dashboard-grid">
                 <div class="chart-card">
@@ -209,6 +226,10 @@
                                     <th>Designation</th>
                                     <th>Base Salary</th>
                                     <th>System Role</th>
+                                    <th>Leave Balance</th>
+                                    <th>PF Balance</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="employee_table_body"></tbody>
@@ -536,7 +557,86 @@
                 </div>
             </div>
         </div>
+        <div id="attendance" class="tab-content">
 
+            <div class="header">
+                <h1>Attendance Management</h1>
+            </div>
+
+        <div class="table-card">
+
+            <h3>Attendance Logs</h3>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>In Time</th>
+                    <th>Out Time</th>
+                    <th>Hours</th>
+                    <th>OT Hours</th>
+                </tr>
+                </thead>
+
+            <tbody id="attendance_table_body"></tbody>
+
+            </table>
+
+        </div>
+
+        </div>
+    <div id="expenses" class="tab-content">
+
+    <div class="header">
+        <h1>Expense Reimbursement</h1>
+    </div>
+
+    <div class="form-card">
+
+        <form id="expense_form">
+
+            <input type="number"
+                   id="expense_amount"
+                   placeholder="Amount">
+
+            <input type="text"
+                   id="expense_description"
+                   placeholder="Description">
+
+            <button type="submit"
+                    class="btn-primary">
+                Submit Expense
+            </button>
+
+        </form>
+
+    </div>
+
+</div>  
+  <div id="holidays" class="tab-content">
+
+    <div class="header">
+        <h1>Festival Holidays</h1>
+    </div>
+
+    <div class="table-card">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Holiday</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+
+            <tbody id="holiday_table_body"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
     </div>
 </div>
 
