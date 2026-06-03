@@ -101,7 +101,8 @@ window.onload = async function() {
         }
 
         // ── 3. Set real session data into state ────────────
-        state.currentRole = user.role;  // "Admin", "HR", or "MD"
+        state.currentRole = user.role;
+        state.myUserId    = user.user_id;
 
         // Update topbar profile with real name/role
         document.getElementById("user_profile_name").innerText = user.name;
@@ -261,6 +262,7 @@ function loadRealData() {
             loadLiveLeavesData();
             loadLiveAnomaliesData();
             loadLiveBehaviorData();
+            loadMyLeaveBalance('admin_leaves_left');
         })
         .catch(err => {
             console.error("Failed to load database. Falling back to offline context", err);
@@ -440,7 +442,7 @@ function renderEmployeeTable() {
     tbody.innerHTML = "";
 
     if (state.employees.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No employees loaded. Add one to start.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No employees loaded. Add one to start.</td></tr>`;
         return;
     }
 
@@ -450,11 +452,76 @@ function renderEmployeeTable() {
             <td>#${emp.id}</td>
             <td class="emp-name-badge">${emp.name}<br><span style="font-size:11px;color:var(--text-muted);font-weight:normal;">${emp.email}</span></td>
             <td>${emp.designation}</td>
-            <td style="font-weight:600;color:var(--text-primary);">$${emp.basic_salary.toLocaleString()}</td>
+            <td style="font-weight:600;color:var(--text-primary);">₹${emp.basic_salary.toLocaleString()}</td>
             <td><span class="badge ${getRoleColor(emp.role)}">${emp.role}</span></td>
+            <td id="leave_bal_${emp.id}" style="font-weight:600;color:var(--accent-green);">—</td>
+            <td>
+                <button class="btn-delete-emp" onclick="deleteEmployee(${emp.id}, '${emp.name.replace(/'/g, "\'")}')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                    Delete
+                </button>
+            </td>
         `;
         tbody.appendChild(tr);
+
+        if (state.isOnline) {
+            fetch(`/leave_balance/${emp.id}`, { credentials: 'include' })
+                .then(r => r.json())
+                .then(data => {
+                    const el = document.getElementById(`leave_bal_${emp.id}`);
+                    if (el && data.remaining !== undefined) {
+                        el.textContent = `${data.remaining} / ${data.total}`;
+                        el.style.color = data.remaining <= 5 ? 'var(--accent-red)' : data.remaining <= 10 ? 'var(--accent-amber)' : 'var(--accent-green)';
+                    }
+                })
+                .catch(() => {});
+        }
     });
+}
+
+
+window.deleteEmployee = function(empId, empName) {
+    if (!confirm(`Delete ${empName}? This cannot be undone.`)) return;
+
+    if (state.isOnline) {
+        fetch(`/delete_employee/${empId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                addLogEntry("red", `Deleted employee: ${empName}`, "Just now");
+                loadRealData();
+            } else {
+                alert(data.error || "Failed to delete employee");
+            }
+        })
+        .catch(err => { console.error(err); deleteEmployeeOffline(empId, empName); });
+    } else {
+        deleteEmployeeOffline(empId, empName);
+    }
+};
+
+function deleteEmployeeOffline(empId, empName) {
+    state.employees = state.employees.filter(e => e.id !== empId);
+    addLogEntry("red", `Removed ${empName} from local cache`, "Just now");
+    refreshAppUI();
+}
+
+// ==========================================
+// LEAVE BALANCE HELPER
+// ==========================================
+function loadMyLeaveBalance(elementId) {
+    const userId = state.myUserId;
+    if (!userId) return;
+    fetch(`${BACKEND_URL}/leave_balance/${userId}`, { credentials: 'include' })
+        .then(r => r.json())
+        .then(data => {
+            const el = document.getElementById(elementId);
+            if (el) el.textContent = `${data.remaining} / ${data.total}`;
+        })
+        .catch(() => {});
 }
 
 function getRoleColor(role) {
@@ -537,8 +604,14 @@ document.getElementById("employee_search").addEventListener("input", function(e)
             <td>#${emp.id}</td>
             <td class="emp-name-badge">${emp.name}<br><span style="font-size:11px;color:var(--text-muted);">${emp.email}</span></td>
             <td>${emp.designation}</td>
-            <td style="font-weight:600;">$${emp.basic_salary.toLocaleString()}</td>
+            <td style="font-weight:600;">₹${emp.basic_salary.toLocaleString()}</td>
             <td><span class="badge ${getRoleColor(emp.role)}">${emp.role}</span></td>
+            <td>
+                <button class="btn-delete-emp" onclick="deleteEmployee(${emp.id}, '${emp.name.replace(/'/g, "\'")}')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14M6 6l1 14"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                    Delete
+                </button>
+            </td>
         `;
         tbody.appendChild(tr);
     });
@@ -867,17 +940,57 @@ function approveLeaveOffline(leaveId, decision) {
     }
 }
 
+// Leave tab toggle: 'self' or 'other'
+let leaveMode = 'self';
+function switchLeaveTab(mode) {
+    leaveMode = mode;
+    const empGroup = document.getElementById('leaveEmpGroup');
+    const selfBtn  = document.getElementById('leaveTabSelf');
+    const otherBtn = document.getElementById('leaveTabOther');
+    if (mode === 'self') {
+        empGroup.style.display = 'none';
+        document.getElementById('leave_emp_id').required = false;
+        selfBtn.style.background  = 'var(--accent-blue)';
+        selfBtn.style.color       = '#fff';
+        selfBtn.style.borderColor = 'var(--accent-blue)';
+        otherBtn.style.background = 'transparent';
+        otherBtn.style.color      = 'var(--text-secondary)';
+        otherBtn.style.borderColor= 'var(--border)';
+    } else {
+        empGroup.style.display = 'block';
+        document.getElementById('leave_emp_id').required = true;
+        otherBtn.style.background  = 'var(--accent-blue)';
+        otherBtn.style.color       = '#fff';
+        otherBtn.style.borderColor = 'var(--accent-blue)';
+        selfBtn.style.background   = 'transparent';
+        selfBtn.style.color        = 'var(--text-secondary)';
+        selfBtn.style.borderColor  = 'var(--border)';
+    }
+}
+// Init: hide employee dropdown on load
+document.addEventListener('DOMContentLoaded', () => switchLeaveTab('self'));
+
 document.getElementById("apply_leave_form").addEventListener("submit", function(e) {
     e.preventDefault();
 
-    const empId = parseInt(document.getElementById("leave_emp_id").value);
-    const days  = parseInt(document.getElementById("leave_days").value);
-    if (isNaN(empId) || isNaN(days)) return;
+    const fromDate  = document.getElementById("leave_from").value;
+    const toDate    = document.getElementById("leave_to").value;
+    const leaveType = document.getElementById("leave_type").value;
+    const reason    = document.getElementById("leave_reason").value;
 
-    const emp = state.employees.find(e => e.id === empId);
-    if (!emp) return;
+    if (!fromDate || !toDate || !leaveType) return;
 
-    const payload = { employee_id: empId, days };
+    const payload = { from_date: fromDate, to_date: toDate, leave_type: leaveType, reason };
+
+    // If applying on behalf, include employee_id
+    if (leaveMode === 'other') {
+        const empId = parseInt(document.getElementById("leave_emp_id").value);
+        if (isNaN(empId)) return;
+        payload.employee_id = empId;
+    }
+
+    const empName = leaveMode === 'self' ? 'myself' :
+        (state.employees.find(e => e.id === payload.employee_id) || {}).name || 'employee';
 
     if (state.isOnline) {
         fetch(`${BACKEND_URL}/apply_leave`, {
@@ -887,14 +1000,17 @@ document.getElementById("apply_leave_form").addEventListener("submit", function(
             body: JSON.stringify(payload)
         })
         .then(res => res.json())
-        .then(() => {
-            addLogEntry("blue", `Submitted leave for ${emp.name} (${days} days)`, "Just now");
-            document.getElementById("apply_leave_form").reset();
-            loadLiveLeavesData();
+        .then(data => {
+            if (data.success) {
+                addLogEntry("blue", `Leave submitted for ${empName}`, "Just now");
+                document.getElementById("apply_leave_form").reset();
+                switchLeaveTab(leaveMode);
+                loadLiveLeavesData();
+            } else {
+                alert(data.error || "Failed to submit leave");
+            }
         })
-        .catch(err => { console.error(err); applyLeaveOffline(emp, days); });
-    } else {
-        applyLeaveOffline(emp, days);
+        .catch(err => console.error(err));
     }
 });
 

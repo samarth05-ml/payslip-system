@@ -11,8 +11,6 @@ ADMIN_ROLES = ('Admin', 'HR', 'MD')
 
 
 # ── POST /apply_leave ─────────────────────────────────────────
-# Employees submit their own leave; admins can submit on behalf of any employee.
-
 @leave_bp.route('/apply_leave', methods=['POST'])
 @login_required
 def apply_leave():
@@ -23,7 +21,7 @@ def apply_leave():
     if session['user_role'] not in ADMIN_ROLES:
         employee_id = session['user_id']
     else:
-        employee_id = data.get('employee_id')
+        employee_id = data.get('employee_id') or session['user_id']
 
     leave_type = data.get('leave_type')
     from_date  = data.get('from_date')
@@ -33,42 +31,31 @@ def apply_leave():
     employee = Employee.query.get(employee_id)
 
     if not employee:
-        return jsonify({
-            "success": False,
-            "error": "Employee not found"
-        }), 404
+        return jsonify({"success": False, "error": "Employee not found"}), 404
 
-    # Calculate leave days
     try:
         from_dt = datetime.strptime(from_date, '%Y-%m-%d')
         to_dt   = datetime.strptime(to_date, '%Y-%m-%d')
-
         days = (to_dt - from_dt).days + 1
-
     except Exception:
-        return jsonify({
-            "success": False,
-            "error": "Invalid date format"
-        }), 400
+        return jsonify({"success": False, "error": "Invalid date format"}), 400
 
-    # Decide approver based on role
+    # Decide approver based on role, with safe fallbacks
     if employee.role == "Employee":
-        approver = Employee.query.filter_by(role="HR").first()
-
+        approver = Employee.query.filter_by(role="HR").first() or \
+                   Employee.query.filter_by(role="MD").first() or \
+                   Employee.query.filter_by(role="Admin").first()
     elif employee.role == "HR":
-        approver = Employee.query.filter_by(role="MD").first()
-
+        approver = Employee.query.filter_by(role="MD").first() or \
+                   Employee.query.filter_by(role="Admin").first() or \
+                   Employee.query.filter(Employee.role == "HR", Employee.id != employee.id).first()
     else:
-        approver = None
+        approver = Employee.query.filter_by(role="Admin").first() or \
+                   Employee.query.filter_by(role="HR").first()
 
+    # Last resort: assign to self
     if not approver:
-        approver = Employee.query.first()
-
-    if not approver:
-        return jsonify({
-            "success": False,
-            "error": "Approver not found"
-        }), 404
+        approver = employee
 
     leave = Leave(
         employee_id = employee_id,
@@ -97,7 +84,7 @@ def approve_leave():
     data = request.json
 
     leave_id = data.get('leave_id')
-    status   = data.get('status')   # "Approved" / "Rejected"
+    status   = data.get('status')
 
     leave = Leave.query.get(leave_id)
     if not leave:
@@ -112,11 +99,9 @@ def approve_leave():
 
 
 # ── GET /leave_status/<employee_id> ──────────────────────────
-# Employees can only see their own; admins can see anyone's.
 @leave_bp.route('/leave_status/<int:employee_id>', methods=['GET'])
 @login_required
 def leave_status(employee_id):
-    # Block employee from querying another employee's leaves
     if session['user_role'] not in ADMIN_ROLES:
         if session['user_id'] != employee_id:
             return jsonify({"error": "Forbidden"}), 403
@@ -126,33 +111,54 @@ def leave_status(employee_id):
     result = []
     for leave in leaves:
         result.append({
-            "leave_id":   leave.id,
-            "days":       leave.days,
-            "status":     leave.status,
-            "approver_id":leave.approver_id
+            "leave_id":    leave.id,
+            "days":        leave.days,
+            "status":      leave.status,
+            "approver_id": leave.approver_id
         })
 
     return jsonify(result)
 
 
-# ── GET /my_leaves  (employee portal shortcut) ────────────────
+# ── GET /my_leaves ────────────────────────────────────────────
 @leave_bp.route('/my_leaves', methods=['GET'])
 @login_required
 def my_leaves():
     leaves = Leave.query.filter_by(employee_id=session['user_id']).all()
 
     result = []
-
     for leave in leaves:
         result.append({
-            "leave_id":    leave.id,
-            "leave_type":  leave.leave_type,
-            "from_date":   leave.from_date,
-            "to_date":     leave.to_date,
-            "days":        leave.days,
-            "status":      leave.status,
+            "leave_id":     leave.id,
+            "leave_type":   leave.leave_type,
+            "from_date":    leave.from_date,
+            "to_date":      leave.to_date,
+            "days":         leave.days,
+            "status":       leave.status,
             "submitted_at": leave.submitted_at,
-            "approver_id": leave.approver_id
+            "approver_id":  leave.approver_id
         })
 
     return jsonify(result)
+
+
+# ── GET /leave_balance/<employee_id> ─────────────────────────
+TOTAL_LEAVES_PER_YEAR = 20
+
+@leave_bp.route('/leave_balance/<int:employee_id>', methods=['GET'])
+@login_required
+def leave_balance(employee_id):
+    if session['user_role'] not in ADMIN_ROLES:
+        if session['user_id'] != employee_id:
+            return jsonify({"error": "Forbidden"}), 403
+
+    approved_days = db.session.query(db.func.sum(Leave.days)).filter_by(
+        employee_id=employee_id, status="Approved"
+    ).scalar() or 0
+
+    return jsonify({
+        "employee_id":   employee_id,
+        "total":         TOTAL_LEAVES_PER_YEAR,
+        "used":          int(approved_days),
+        "remaining":     max(0, TOTAL_LEAVES_PER_YEAR - int(approved_days))
+    })

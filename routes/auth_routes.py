@@ -23,15 +23,17 @@ def login():
     if not employee or not check_password_hash(employee.password_hash, password):
         return jsonify({'success': False, 'error': 'Invalid email or password'}), 401
 
-    session['user_id']   = employee.id
-    session['user_name'] = employee.name
-    session['user_role'] = employee.role
+    session['user_id']          = employee.id
+    session['user_name']        = employee.name
+    session['user_role']        = employee.role
+    session['user_designation'] = employee.designation
 
     return jsonify({
-        'success': True,
-        'role':    employee.role,
-        'name':    employee.name,
-        'user_id': employee.id
+        'success':     True,
+        'role':        employee.role,
+        'name':        employee.name,
+        'user_id':     employee.id,
+        'designation': employee.designation
     })
 
 
@@ -48,8 +50,9 @@ def me():
     if 'user_id' not in session:
         return jsonify({'logged_in': False}), 401
     return jsonify({
-        'logged_in': True,
-        'user_id':   session['user_id'],
-        'name':      session['user_name'],
-        'role':      session['user_role']
+        'logged_in':   True,
+        'user_id':     session['user_id'],
+        'name':        session['user_name'],
+        'role':        session['user_role'],
+        'designation': session.get('user_designation', '')
     })

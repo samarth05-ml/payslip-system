@@ -302,7 +302,7 @@ img { max-width: 100%; height: auto; }
 /* ── STAT CARDS ── */
 .cards {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
     margin-bottom: 35px;
 }
@@ -776,3 +776,25 @@ tr:hover td { background: rgba(255,255,255,0.015); color: var(--text-primary); }
     .topbar-right { width: 100%; justify-content: space-between; }
     .cards { grid-template-columns: 1fr 1fr; }
 }
+/* ── Delete Employee Button ─────────────────────────────── */
+.btn-delete-emp {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #ef4444;
+    background: transparent;
+    border: 1px solid #ef444455;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+.btn-delete-emp:hover {
+    background: #ef444415;
+    border-color: #ef4444;
+    color: #dc2626;
+}
+.btn-delete-emp svg { flex-shrink: 0; }

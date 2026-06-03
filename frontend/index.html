@@ -130,6 +130,15 @@
                         <img src="/frontend/assets/anomaly.svg" alt="Anomalies">
                     </div>
                 </div>
+                <div class="card" style="border-color:rgba(16,185,129,0.2);">
+                    <div class="card-info">
+                        <h3>My Leaves Left</h3>
+                        <p id="admin_leaves_left" style="color:var(--accent-green);">—</p>
+                    </div>
+                    <div class="card-icon">
+                        <img src="/frontend/assets/leave.svg" alt="Leaves Left">
+                    </div>
+                </div>
             </div>
 
             <div class="dashboard-grid">
@@ -209,6 +218,8 @@
                                     <th>Designation</th>
                                     <th>Base Salary</th>
                                     <th>System Role</th>
+                                    <th>Leaves Left</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="employee_table_body"></tbody>
@@ -382,17 +393,49 @@
             <div class="ml-panel-grid">
                 <div style="display: flex; flex-direction: column; gap: 20px;">
                     <div class="form-card">
-                        <h3> Apply for Leave</h3>
+                        <h3>🗓 Apply for Leave</h3>
+                        <!-- Toggle: apply for self or on behalf -->
+                        <div style="display:flex;gap:8px;margin-bottom:16px;">
+                            <button type="button" id="leaveTabSelf" onclick="switchLeaveTab('self')"
+                                style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--accent-blue);background:var(--accent-blue);color:#fff;cursor:pointer;font-size:.85rem;font-weight:600;">
+                                Apply for Myself
+                            </button>
+                            <button type="button" id="leaveTabOther" onclick="switchLeaveTab('other')"
+                                style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;font-size:.85rem;font-weight:600;">
+                                On Behalf of Employee
+                            </button>
+                        </div>
                         <form id="apply_leave_form">
-                            <div class="form-group">
+                            <!-- Employee selector (hidden when applying for self) -->
+                            <div class="form-group" id="leaveEmpGroup">
                                 <label for="leave_emp_id">Employee Name</label>
-                                <select id="leave_emp_id" class="form-control" required style="background-color: var(--bg-primary);">
+                                <select id="leave_emp_id" class="form-control" style="background-color: var(--bg-primary);">
                                     <option value="" disabled selected>Select employee...</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="leave_days">Number of Days Requested</label>
-                                <input type="number" id="leave_days" class="form-control" min="1" max="30" placeholder="e.g. 5" required>
+                                <label for="leave_type">Leave Type</label>
+                                <select id="leave_type" class="form-control" required style="background-color: var(--bg-primary);">
+                                    <option value="" disabled selected>Select type...</option>
+                                    <option value="Casual">Casual Leave</option>
+                                    <option value="Sick">Sick Leave</option>
+                                    <option value="Earned">Earned Leave</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="display:flex;gap:12px;">
+                                <div style="flex:1;">
+                                    <label for="leave_from">From Date</label>
+                                    <input type="date" id="leave_from" class="form-control" required>
+                                </div>
+                                <div style="flex:1;">
+                                    <label for="leave_to">To Date</label>
+                                    <input type="date" id="leave_to" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="leave_reason">Reason</label>
+                                <input type="text" id="leave_reason" class="form-control" placeholder="Brief reason..." required>
                             </div>
                             <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 15px;">
                                 Submit Application

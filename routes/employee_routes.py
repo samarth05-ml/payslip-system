@@ -47,3 +47,17 @@ def get_employees():
         })
 
     return jsonify(result)
+@employee_bp.route('/delete_employee/<int:emp_id>', methods=['DELETE'])
+@admin_required
+def delete_employee(emp_id):
+    employee = Employee.query.get(emp_id)
+    if not employee:
+        return jsonify({"success": False, "error": "Employee not found"}), 404
+
+    # Prevent deleting yourself
+    if emp_id == session.get('user_id'):
+        return jsonify({"success": False, "error": "Cannot delete your own account"}), 400
+
+    db.session.delete(employee)
+    db.session.commit()
+    return jsonify({"success": True, "message": f"{employee.name} deleted successfully"})

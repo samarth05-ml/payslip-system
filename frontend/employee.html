@@ -463,6 +463,10 @@
       <div class="hero-label">Employee Self-Service Portal</div>
       <div class="hero-title" id="heroTitle">Good day 👋</div>
       <div class="hero-sub">Here's a snapshot of your payroll and leave status.</div>
+      <div style="margin-top:.6rem;display:flex;gap:.6rem;flex-wrap:wrap;">
+        <span id="heroDesignation" style="background:rgba(255,255,255,0.15);color:#fff;padding:.25rem .75rem;border-radius:999px;font-size:.8rem;font-weight:500;"></span>
+        <span id="heroRole" style="background:rgba(255,255,255,0.15);color:#fff;padding:.25rem .75rem;border-radius:999px;font-size:.8rem;font-weight:500;"></span>
+      </div>
     </div>
 
     <div class="stats">
@@ -489,6 +493,12 @@
         <div class="stat-label">Last Net Pay</div>
         <div class="stat-val" id="statSalary">—</div>
         <div class="stat-sub">Most recent</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🗓️</div>
+        <div class="stat-label">Leaves Left</div>
+        <div class="stat-val" id="statLeavesLeft" style="color:var(--green);">—</div>
+        <div class="stat-sub">of 20 this year</div>
       </div>
     </div>
 
@@ -606,6 +616,8 @@
     }
 
     document.getElementById('navName').textContent = data.name;
+    if (data.designation) document.getElementById('heroDesignation').textContent = '💼 ' + data.designation;
+    if (data.role)        document.getElementById('heroRole').textContent        = '🔖 ' + data.role;
     const hour = new Date().getHours();
     const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
     document.getElementById('heroTitle').textContent = `${greet}, ${data.name.split(' ')[0]} 👋`;
@@ -641,6 +653,19 @@
         const last = payslips[payslips.length - 1];
         document.getElementById('statSalary').textContent = '₹' + Number(last.net_salary || 0).toLocaleString('en-IN');
       }
+
+      // Load leave balance
+      try {
+        const meRes  = await fetch('/api/me', { credentials: 'include' });
+        const meData = meRes.ok ? await meRes.json() : {};
+        if (meData.user_id) {
+          const balRes  = await fetch(`/leave_balance/${meData.user_id}`, { credentials: 'include' });
+          const balData = balRes.ok ? await balRes.json() : {};
+          if (balData.remaining !== undefined) {
+            document.getElementById('statLeavesLeft').textContent = `${balData.remaining} / ${balData.total}`;
+          }
+        }
+      } catch(e) {}
 
       // Recent activity
       const box = document.getElementById('recentActivity');
